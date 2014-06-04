@@ -12,7 +12,9 @@ repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://mirrors.ibiblio.org/maven2/"
 repositories.remote << "https://repository.cloudera.com/content/repositories/releases/"
 
-repositories.release_to = ENV["RELEASE_URI"]
+# push artifacts to mvn on build/release
+#repositories.release_to = ENV["RELEASE_URI"]
+repositories.release_to = "sftp://ubuntu@mvn.evidon.com:/var/www/mvn.evidon.com"
 
 require "./buildfile_libraries"
 SEWER_JARS = add_artifacts( HADOOP, LOGGER, JSON_SMART, GUAVA, COMMONS_LANG3,
