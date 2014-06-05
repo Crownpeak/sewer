@@ -51,7 +51,7 @@ define "sewer" do
 
   run.using :main => MAIN_CLASS
 
-  package(:jar)
+  # package(:jar)
   # package(:sources)
   # package(:jar).with project.test.compile.target
   # package(:jar, {:classifier => "tests"}).clean.include("target/test/classes/*")
