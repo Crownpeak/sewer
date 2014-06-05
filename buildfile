@@ -57,7 +57,7 @@ define "sewer" do
   # package(:jar, {:classifier => "tests"}).clean.include("target/test/classes/*")
   # package(:javadoc)
 
-  package(:tgz).tap do |path|
+  package(:zip).path("#{id}-#{version}").tap do |path|
     path.include "README.md"
     path.include "LICENSE"
     path.include package(:jar), package(:sources)
