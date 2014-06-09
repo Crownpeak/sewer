@@ -25,7 +25,7 @@ repositories.release_to = "sftp://ubuntu@mvn.evidon.com:/var/www/mvn.evidon.com"
 require "./buildfile_libraries"
 SEWER_JARS = add_artifacts( HADOOP, LOGGER, JSON_SMART, GUAVA, COMMONS_LANG3,
                             JACKSON, JETTY, COMMONS_POOL, COMMONS_DAEMON,
-                            METRICS, DISRUPTOR, COMMONS_IO, NERF )
+                            METRICS, DISRUPTOR, COMMONS_IO, NERF, GEOIP )
 SEWER_TEST_JARS = add_artifacts( SEWER_JARS, HADOOP_TEST )
 RUN_JARS = add_artifacts( JOLOKIA_JVM )
 
