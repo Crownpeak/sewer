@@ -6,6 +6,9 @@ VERSION_NUMBER = "0.5.5"
 #   - com.evidon.nerf.sewer.AnonAccessLogExtractor
 NERF_VERSION = "1.2.9"
 
+# Maxmind GeoIP jar dependency version
+GEOIP_VERSION = "1.2.8-fast2"
+
 # Group identifier for your projects
 GROUP = "net.pixelcop.sewer"
 VENDOR = "Pixelcop Research, Inc."
