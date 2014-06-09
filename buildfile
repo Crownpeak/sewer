@@ -1,6 +1,11 @@
 
 # Version number for this release
 VERSION_NUMBER = "0.5.5"
+
+# Version number of nerf jar containing shared class:
+#   - com.evidon.nerf.sewer.AnonAccessLogExtractor
+NERF_VERSION = "1.2.8"
+
 # Group identifier for your projects
 GROUP = "net.pixelcop.sewer"
 VENDOR = "Pixelcop Research, Inc."
@@ -8,6 +13,7 @@ URL = "https://github.com/chetan/sewer"
 MAIN_CLASS = 'net.pixelcop.sewer.node.Node'
 
 # Specify Maven 2.0 remote repositories here, like this:
+repositories.remote << "http://mvn.evidon.com"
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://mirrors.ibiblio.org/maven2/"
 repositories.remote << "https://repository.cloudera.com/content/repositories/releases/"
@@ -19,7 +25,7 @@ repositories.release_to = "sftp://ubuntu@mvn.evidon.com:/var/www/mvn.evidon.com"
 require "./buildfile_libraries"
 SEWER_JARS = add_artifacts( HADOOP, LOGGER, JSON_SMART, GUAVA, COMMONS_LANG3,
                             JACKSON, JETTY, COMMONS_POOL, COMMONS_DAEMON,
-                            METRICS, DISRUPTOR, COMMONS_IO )
+                            METRICS, DISRUPTOR, COMMONS_IO, NERF )
 SEWER_TEST_JARS = add_artifacts( SEWER_JARS, HADOOP_TEST )
 RUN_JARS = add_artifacts( JOLOKIA_JVM )
 

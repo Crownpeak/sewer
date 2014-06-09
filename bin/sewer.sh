@@ -12,7 +12,7 @@ USER=
 JMX_PORT=7777
 
 ROOT=$(readlink -f $(dirname $0)/..)
-TMP=$ROOT/tmp
+#TMP=$ROOT/tmp
 VAR=$ROOT/var
 PID_FILE=$VAR/sewer.pid
 OUT_FILE=$VAR/sewer.out

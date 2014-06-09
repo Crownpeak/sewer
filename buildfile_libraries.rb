@@ -56,9 +56,6 @@ JETTY = [
   "org.eclipse.jetty:jetty-util:jar:#{JETTY_VERSION}"
   ]
 
-
-
-
 JETTY_VERSION_6 = "6.1.14"
 JETTY_6 = [
     "org.mortbay.jetty:servlet-api:jar:2.5-20081211",
@@ -130,6 +127,9 @@ JOLOKIA_JVM = [
     "org.jolokia:jolokia-jvm-agent:jar:1.0.5"
     ]
 download(artifact("org.jolokia:jolokia-jvm-agent:jar:1.0.5") => "http://mirrors.ibiblio.org/pub/mirrors/maven2/org/jolokia/jolokia-jvm/1.0.5/jolokia-jvm-1.0.5-agent.jar")
+
+NERF = [ "com.evidon.nerf:nerf:jar:#{NERF_VERSION}" ]
+
 
 class Buildr::Artifact
   def <=>(other)
