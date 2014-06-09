@@ -4,7 +4,7 @@ VERSION_NUMBER = "0.5.5"
 
 # Version number of nerf jar containing shared class:
 #   - com.evidon.nerf.sewer.AnonAccessLogExtractor
-NERF_VERSION = "1.2.8"
+NERF_VERSION = "1.2.9"
 
 # Group identifier for your projects
 GROUP = "net.pixelcop.sewer"
