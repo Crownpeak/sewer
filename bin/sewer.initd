@@ -15,7 +15,7 @@
 # pidfile: $SEWER_HOME/var/sewer.pid
 
 # must set in order to work
-SEWER_HOME=
+SEWER_HOME=$( cd $(dirname $(readlink -f $0))/..; pwd )
 SEWER_BIN="$SEWER_HOME/bin/sewer.sh"
 
 case $1 in
