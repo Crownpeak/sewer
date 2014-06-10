@@ -38,7 +38,7 @@ JOPTS="-XX:+AggressiveOpts -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFra
 # -XX:+OptimizeFill
 
 # this loads the Jolokia JMX agent on port $JMX_PORT
-JOPTS="-javaagent:$ROOT/lib/jolokia-jvm-agent-*.jar=port=$JMX_PORT,host=localhost $JOPTS"
+JOPTS="-javaagent:$ROOT/lib/jolokia-jvm-agent-1.0.5.jar=port=$JMX_PORT,host=localhost $JOPTS"
 
 # -----------------------------------------------------------------------------
 # shouldn't need to edit below this line
