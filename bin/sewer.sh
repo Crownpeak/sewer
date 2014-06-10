@@ -6,13 +6,12 @@
 JAVA_HOME=/usr/lib/jvm/java-7-oracle
 
 # set USER var to drop privileges to this account (only if jsvc 1.0.8 is avail)
-USER=
+USER=evidon
 
 # Jolokia/JMX agent port
 JMX_PORT=7777
 
 ROOT=$(readlink -f $(dirname $0)/..)
-#TMP=$ROOT/tmp
 VAR=$ROOT/var
 PID_FILE=$VAR/sewer.pid
 OUT_FILE=$VAR/sewer.out
