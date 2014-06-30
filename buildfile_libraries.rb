@@ -27,9 +27,11 @@ LOGGER = [
 JSON_SMART = [ 'net.minidev:json-smart:jar:1.0.9-1' ]
 
 JACKSON = [
-    "com.fasterxml.jackson.core:jackson-core:jar:2.0.6",
-    "com.fasterxml.jackson.core:jackson-databind:jar:2.0.6",
-    "com.fasterxml.jackson.core:jackson-annotations:jar:2.0.6"
+    "org.codehaus.jackson:jackson-core-asl:jar:1.9.3",
+    "org.codehaus.jackson:jackson-mapper-asl:jar:1.9.3",
+    "com.fasterxml.jackson.core:jackson-databind:jar:2.2.3",
+    "com.fasterxml.jackson.core:jackson-core:jar:2.2.3",
+    "com.fasterxml.jackson.core:jackson-annotations:jar:2.2.3",
 ]
 
 JACKSON_OLD = [
@@ -130,8 +132,8 @@ download(artifact("org.jolokia:jolokia-jvm-agent:jar:1.0.5") => "http://mirrors.
 
 NERF = [ "com.evidon.nerf:nerf:jar:#{NERF_VERSION}" ]
 
-GEOIP = [ "com.maxmind.geoip2:geoip2:jar:#{GEOIP_VERSION}"]
-
+GEOIP = [ "com.maxmind.geoip2:geoip2:jar:#{GEOIP_VERSION}",
+           "com.maxmind.db:maxmind-db:jar:0.3.3" ]
 
 class Buildr::Artifact
   def <=>(other)
