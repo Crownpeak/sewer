@@ -130,7 +130,7 @@ download(artifact("org.jolokia:jolokia-jvm-agent:jar:1.0.5") => "http://mirrors.
 
 NERF = [ "com.evidon.nerf:nerf:jar:#{NERF_VERSION}" ]
 
-GEOIP = [ "com.maxmind.geoip:geoip:jar:#{GEOIP_VERSION}"]
+GEOIP = [ "com.maxmind.geoip2:geoip2:jar:#{GEOIP_VERSION}"]
 
 
 class Buildr::Artifact
