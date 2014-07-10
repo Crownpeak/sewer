@@ -1,18 +1,18 @@
 
 # Version number for this release
-VERSION_NUMBER = "0.5.5"
+VERSION_NUMBER = "0.6.0"
 
 # Version number of nerf jar containing shared class:
 #   - com.evidon.nerf.sewer.AnonAccessLogExtractor
-NERF_VERSION = "1.2.9"
+NERF_VERSION = "1.3.0"
 
 # Maxmind GeoIP jar dependency version
-GEOIP_VERSION = "1.2.8-fast2"
+GEOIP_VERSION = "0.7.2"
 
 # Group identifier for your projects
 GROUP = "net.pixelcop.sewer"
-VENDOR = "Pixelcop Research, Inc."
-URL = "https://github.com/chetan/sewer"
+VENDOR = "Evidon, Inc."
+URL = "https://github.com/evidon/sewer"
 MAIN_CLASS = 'net.pixelcop.sewer.node.Node'
 
 # Specify Maven 2.0 remote repositories here, like this:
