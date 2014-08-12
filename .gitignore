@@ -8,4 +8,8 @@ build/
 .project
 .settings/
 
+sewer.iml
+sewer.ipl
+sewer.iws
+
 src/main/java/Test*.java
