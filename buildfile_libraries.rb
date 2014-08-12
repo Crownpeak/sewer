@@ -116,6 +116,14 @@ HADOOP_TEST = [
   "org.apache.hadoop:hadoop-hdfs:jar:test-sources:#{HADOOP_VERSION}",
 ] + JETTY + JACKSON
 
+KAFKA = [
+  "org.apache.kafka:kafka_2.8.0:jar:0.8.1",
+  "org.apache.kafka:kafka-java-examples:jar:0.8.0",
+  "org.apache.kafka:contrib_2.9.2:jar:0.8.0",
+  "org.apache.kafka:kafka-hadoop-producer:jar:0.8.1",
+  "org.apache.kafka:kafka-hadoop-consumer:jar:0.8.1",
+  "org.apache.kafka:kafka-perf_2.8.0:jar:0.8.1"
+]
 
 METRICS = [
     "com.codahale.metrics:metrics-core:jar:3.0.0",

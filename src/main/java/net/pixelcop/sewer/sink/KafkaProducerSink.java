@@ -21,30 +21,35 @@ import kafka.consumer.ConsumerConfig;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.javaapi.producer.Producer;
-import kafka.javaapi.producer.ProducerData;
 import kafka.message.Message;
 import kafka.message.MessageAndMetadata;
+import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
-/**
- * Created by aabraham on 8/4/14.
- */
-public class KafkaSink {
+
+
+public class KafkaProducerSink {
     private final Producer<String, Message> kafkaProducer;
-    private static final SpecificDatumWriter<Event> avroEventWriter = new SpecificDatumWriter<Event>(Event.SCHEMA$);
+    private static final SpecificDatumWriter<kEvent> avroEventWriter = new SpecificDatumWriter<kEvent>(kEvent.SCHEMA$);
     private static final EncoderFactory avroEncoderFactory = EncoderFactory.get();
 
-    public KafkaAvroPublisherExample(MyKafaSettings settings) {
+
+    public KafkaAvroPublisher(String settings) {
         Properties props = new Properties();
-        props.put("zk.connect", settings.zookeeper);
+//        props.put("broker.list", "kafka01:9092,kafka02:9092,kafka03:9092"); // if broker list is used
+        props.put(“zk.connect”, “127.0.0.1:2181,10.10.0.10:2181”)
         props.put("serializer.class", "kafka.serializer.DefaultEncoder");
-        props.put("compression.codec", settings.compression); // snappy
-        props.put("message.send.max.retries", settings.maxRetry);
-        props.put("batch.num.messages", settings.batchSize);
-        props.put("client.id", settings.applicationId);
+        props.put("producer.type", "async");
+        props.put("request.required.acks", "1");
+        props.put("queue.enqueue.timeout.ms", "-1");
+        props.put("batch.num.messages", "300");
+        props.put("compression.codec", "snappy");
+        props.put("message.send.max.retries", "3");
         kafkaProducer = new Producer<String, Message>(new ProducerConfig(props));
+        this.settings = settings;
     }
 
-    public void publish(Event event) {
+
+    public void publish(kEvent event) {
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             BinaryEncoder binaryEncoder = encoderFactory.binaryEncoder(stream, null);
@@ -53,10 +58,9 @@ public class KafkaSink {
             IOUtils.closeQuietly(stream);
 
             Message m = new Message(stream.toByteArray());
-            producer.send(new ProducerData<String, Message>("rawdata", Lists.newArrayList(m)));
+            producer.send(new ProducerRecord("rawdata", "key", "value")).get();
         } catch (IOException e) {
             throw new RuntimeException("Avro serialization failure", e);
         }
     }
-}
 }

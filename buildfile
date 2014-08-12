@@ -28,7 +28,7 @@ repositories.release_to = "sftp://ubuntu@mvn.evidon.com:/var/www/mvn.evidon.com"
 require "./buildfile_libraries"
 SEWER_JARS = add_artifacts( HADOOP, LOGGER, JSON_SMART, GUAVA, COMMONS_LANG3,
                             JACKSON, JETTY, COMMONS_POOL, COMMONS_DAEMON,
-                            METRICS, DISRUPTOR, COMMONS_IO, NERF, GEOIP )
+                            METRICS, DISRUPTOR, COMMONS_IO, NERF, GEOIP, KAFKA )
 SEWER_TEST_JARS = add_artifacts( SEWER_JARS, HADOOP_TEST )
 RUN_JARS = add_artifacts( JOLOKIA_JVM )
 
@@ -79,4 +79,3 @@ end
 # Backward compatibility:  Buildr 1.4+ uses $HOME/.buildr/buildr.rb
 local_config = File.expand_path('buildr.rb', File.dirname(__FILE__))
 load local_config if File.exist? local_config
-
