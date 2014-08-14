@@ -26,13 +26,15 @@ import kafka.message.Message;
 import kafka.message.MessageAndMetadata;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
+import kafka.serializer.Encoder;
 import net.pixelcop.sewer.Event;
+import net.pixelcop.sewer.source.http.AccessLogEvent;
 
 
 public class KafkaSink {
 
 
-    private static final SpecificDatumWriter<Event> avroEventWriter = new SpecificDatumWriter<Event>(Event.SCHEMA$);
+    private static final SpecificDatumWriter<Event> avroEventWriter = new SpecificDatumWriter<Event>(AccessLogEvent.SCHEMA$);
     private static final AvroKafkaEncoder avroEncoderFactory = EncoderFactory.get();
 
     private final Producer<String, Message> producer;
@@ -55,7 +57,7 @@ public class KafkaSink {
         this.settings = settings;
     }
 
-    public void publish(Event event) {
+    public void publish(AccessLogEvent event) {
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             BinaryEncoder binaryEncoder = encoderFactory.binaryEncoder(stream, null);
