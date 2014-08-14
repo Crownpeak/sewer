@@ -1,10 +1,10 @@
 
 # Version number for this release
-VERSION_NUMBER = "0.6.1"
+VERSION_NUMBER = "0.6.2"
 
 # Version number of nerf jar containing shared class:
 #   - com.evidon.nerf.sewer.AnonAccessLogExtractor
-NERF_VERSION = "1.3.3"
+NERF_VERSION = "1.3.4"
 
 # Maxmind GeoIP jar dependency version
 GEOIP_VERSION = "0.7.2"
