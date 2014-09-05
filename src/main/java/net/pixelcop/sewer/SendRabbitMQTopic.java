@@ -6,11 +6,13 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.MessageProperties;
 
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
+
+import java.io.IOException;
+
 
 public class SendRabbitMQTopic {
 
@@ -28,10 +30,10 @@ public class SendRabbitMQTopic {
 
     public SendRabbitMQTopic() {
     	loadProperties();
-    	EXCHANGE_NAME = prop.load("rmq.exchange.name");
-    	EXCHANGE_TYPE = prop.load("rmq.exchange.type");
-    	HOST_NAME = prop.load("rmq.host.name");
-        routingKey = prop.load("rmq.routing.key");
+    	EXCHANGE_NAME = prop.getProperty("rmq.exchange.name");
+    	EXCHANGE_TYPE = prop.getProperty("rmq.exchange.type");
+    	HOST_NAME = prop.getProperty("rmq.host.name");
+        routingKey = prop.getProperty("rmq.routing.key");
 
     	factory = new ConnectionFactory();
         factory.setHost(HOST_NAME);
@@ -39,18 +41,31 @@ public class SendRabbitMQTopic {
     }
 
     public void sendMessage(String message) {
-        channel.basicPublish(EXCHANGE_NAME, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+        try{    
+            channel.basicPublish(EXCHANGE_NAME, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public void open() {
-        connection = factory.newConnection();
-        channel = connection.createChannel();
-        channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
+        try {
+            connection = factory.newConnection();
+            channel = connection.createChannel();
+            channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void close(){
-    	channel.close();
-        connection.close();
+        try {
+            channel.close();
+            connection.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } 
     }
 
 	private void loadProperties() {
