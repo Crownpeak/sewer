@@ -125,6 +125,11 @@ KAFKA = [
   "org.apache.kafka:kafka-perf_2.8.0:jar:0.8.1"
 ]
 
+RABBITMQ = [
+  "com.rabbitmq:rabbitmq-client:jar:1.3.0",
+  "com.rabbitmq:amqp-client:jar:3.3.5"
+]
+
 METRICS = [
     "com.codahale.metrics:metrics-core:jar:3.0.0",
     "com.codahale.metrics:metrics-graphite:jar:3.0.0"
