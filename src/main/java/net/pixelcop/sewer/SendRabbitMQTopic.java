@@ -20,7 +20,7 @@ public class SendRabbitMQTopic {
 
     private String propInput = "config.properties";
 
-    private Properties prop = null;
+    private Properties prop = new Properties();
     private ConnectionFactory factory;
     private Channel channel;
     private Connection connection;
