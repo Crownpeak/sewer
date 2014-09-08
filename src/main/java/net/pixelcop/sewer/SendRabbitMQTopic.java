@@ -24,27 +24,30 @@ public class SendRabbitMQTopic {
     private ConnectionFactory factory;
     private Channel channel;
     private Connection connection;
-    private String routingKey;
 
     private String EXCHANGE_NAME;
     private String EXCHANGE_TYPE;
     private String HOST_NAME;
+    private String PORT_NUMBER;
+    private String ROUTING_KEY;
 
     public SendRabbitMQTopic() {
     	loadProperties();
     	EXCHANGE_NAME = prop.getProperty("rmq.exchange.name");
     	EXCHANGE_TYPE = prop.getProperty("rmq.exchange.type");
     	HOST_NAME = prop.getProperty("rmq.host.name");
-        routingKey = prop.getProperty("rmq.routing.key");
+        PORT_NUMBER = prop.getProperty("rmq.port.number")
+        ROUTING_KEY = prop.getProperty("rmq.routing.key");
 
     	factory = new ConnectionFactory();
         factory.setHost(HOST_NAME);
+        factory.setPort(PORT_NUMBER);
 
     }
 
     public void sendMessage(String message) {
         try{    
-            channel.basicPublish(EXCHANGE_NAME, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+            channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
