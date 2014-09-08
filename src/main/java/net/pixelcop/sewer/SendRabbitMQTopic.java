@@ -16,7 +16,7 @@ import java.io.IOException;
 
 public class SendRabbitMQTopic {
 
-    private String propInput = "/src/main/resources/config.properties";
+    private String propInput = "config.properties";
 
     private Properties prop = null;
     private ConnectionFactory factory;
