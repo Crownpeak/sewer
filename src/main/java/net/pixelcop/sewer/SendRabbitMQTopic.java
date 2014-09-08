@@ -9,6 +9,8 @@ import com.rabbitmq.client.MessageProperties;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.File;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 import java.io.IOException;
@@ -73,7 +75,6 @@ public class SendRabbitMQTopic {
 		try {
             File file = new File(SendRabbitMQTopic.class.getClassLoader().getResource( propInput ).toURI());
             prop.load( new FileInputStream( file ) );
-			// prop.load( new FileInputStream( propInput ) );
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (URISyntaxException e) {
