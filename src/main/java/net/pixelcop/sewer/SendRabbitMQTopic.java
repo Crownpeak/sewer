@@ -74,8 +74,10 @@ public class SendRabbitMQTopic {
             File file = new File(SendRabbitMQTopic.class.getClassLoader().getResource( propInput ).toURI());
             prop.load( new FileInputStream( file ) );
 			// prop.load( new FileInputStream( propInput ) );
-		} catch (IOException | URISyntaxException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-		} 
+		} catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
 	}
 }
