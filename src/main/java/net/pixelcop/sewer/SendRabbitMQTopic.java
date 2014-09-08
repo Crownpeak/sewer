@@ -28,7 +28,7 @@ public class SendRabbitMQTopic {
     private String EXCHANGE_NAME;
     private String EXCHANGE_TYPE;
     private String HOST_NAME;
-    private String PORT_NUMBER;
+    private int PORT_NUMBER;
     private String ROUTING_KEY;
 
     public SendRabbitMQTopic() {
@@ -36,7 +36,7 @@ public class SendRabbitMQTopic {
     	EXCHANGE_NAME = prop.getProperty("rmq.exchange.name");
     	EXCHANGE_TYPE = prop.getProperty("rmq.exchange.type");
     	HOST_NAME = prop.getProperty("rmq.host.name");
-        PORT_NUMBER = prop.getProperty("rmq.port.number")
+        PORT_NUMBER = Integer.parseInt( prop.getProperty("rmq.port.number") );
         ROUTING_KEY = prop.getProperty("rmq.routing.key");
 
     	factory = new ConnectionFactory();
