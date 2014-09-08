@@ -71,7 +71,8 @@ public class SendRabbitMQTopic {
 	private void loadProperties() {
 		prop = new Properties();	 
 		try {
-			prop.load( new FileInputStream( propInput ) );
+            prop.load( SendRabbitMQTopic.class.getResourceAsStream(propInput) );
+			// prop.load( new FileInputStream( propInput ) );
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
