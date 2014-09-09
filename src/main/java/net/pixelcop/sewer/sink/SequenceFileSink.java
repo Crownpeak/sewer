@@ -17,10 +17,6 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import RabbitMQ stuff needed to create and send information
-import net.pixelcop.sewer.SendRabbitMQTopic;
-//end of rabbitmq imports
-
 /**
  * A sink which writes to a {@link SequenceFile}, on any filesystem supported by hadoop.
  *
@@ -33,10 +29,6 @@ public class SequenceFileSink extends BucketedSink {
   private static final Logger LOG = LoggerFactory.getLogger(SequenceFileSink.class);
 
   private static final VLongWritable ONE = new VLongWritable(1L);
-
-   //RabbitMQ
-  SendRabbitMQTopic sendRabbit;
-  //end
 
   /**
    * Configured path to write to
@@ -52,9 +44,6 @@ public class SequenceFileSink extends BucketedSink {
 
   public SequenceFileSink(String[] args) {
     this.configPath = args[0];
-    //RabbitMQ
-    sendRabbit = new SendRabbitMQTopic();
-    //end
 
   }
 
@@ -69,10 +58,6 @@ public class SequenceFileSink extends BucketedSink {
       writer.close();
     }
     nextBucket = null;
-
-    //RabbitMQ
-    sendRabbit.close();
-    //end
 
     setStatus(CLOSED);
 
@@ -89,10 +74,6 @@ public class SequenceFileSink extends BucketedSink {
       generateNextBucket();
     }
     createWriter();
-
-    //RabbitMQ
-    sendRabbit.open();
-    //end
 
     setStatus(FLOWING);
   }
@@ -133,9 +114,6 @@ public class SequenceFileSink extends BucketedSink {
   @Override
   public void append(Event event) throws IOException {
     writer.append(event, ONE);
-    //RabbitMQ
-    sendRabbit.sendMessage("This is a test message of routingKey of: l.ghostery.com");
-    //end
   }
 
 }

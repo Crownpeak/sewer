@@ -6,6 +6,7 @@ import java.util.Map;
 import net.pixelcop.sewer.sink.DfsSink;
 import net.pixelcop.sewer.sink.MeterSink;
 import net.pixelcop.sewer.sink.SequenceFileSink;
+import net.pixelcop.sewer.sink.RabbitMQSequenceSink;
 import net.pixelcop.sewer.sink.TcpWriteableEventSink;
 import net.pixelcop.sewer.sink.buffer.AsyncBufferSink;
 import net.pixelcop.sewer.sink.buffer.BufferPoolSink;
@@ -29,6 +30,7 @@ public class SinkRegistry {
     // endpoints
     register("dfs", DfsSink.class);
     register("seqfile", SequenceFileSink.class);
+    register("rabbitseqfile", RabbitMQSequenceSink.class);
     register("reliableseq", ReliableSequenceFileSink.class);
     register("tcpwrite", TcpWriteableEventSink.class);
 
