@@ -52,59 +52,33 @@ public class RabbitMQSequenceSink extends SequenceFileSink {
 
   public RabbitMQSequenceSink(String[] args) {
     super(args);
-
-    if (LOG.isInfoEnabled()) {
-      LOG.info(":::START RabbitMQSequenceSink Constructor");
-    }
     //RabbitMQ
     sendRabbit = new SendRabbitMQTopic();
     //end
-    if (LOG.isInfoEnabled()) {
-      LOG.info(":::END RabbitMQSequenceSink Constructor");
-    }
   }
 
   @Override
   public void close() throws IOException {
-    if (LOG.isInfoEnabled()) {
-      LOG.info(":::START RabbitMQSequenceSink close()");
-    }
     super.close();
     //RabbitMQ
     sendRabbit.close();
     //end
-    if (LOG.isInfoEnabled()) {
-      LOG.info(":::END RabbitMQSequenceSink close()");
-    }
   }
 
   @Override
   public void open() throws IOException {
-    if (LOG.isInfoEnabled()) {
-      LOG.info(":::START RabbitMQSequenceSink open()");
-    }
     super.open();
     //RabbitMQ
     sendRabbit.open();
     //end
-    if (LOG.isInfoEnabled()) {
-      LOG.info(":::END RabbitMQSequenceSink open()");
-    }
   }
 
   @Override
   public void append(Event event) throws IOException {
-    if (LOG.isInfoEnabled()) {
-      LOG.info(":::START RabbitMQSequenceSink append()");
-    }
     super.append(event);
     //RabbitMQ
     sendRabbit.sendMessage("This is a test message of routingKey of: l.ghostery.com");
     //end
-
-    if (LOG.isInfoEnabled()) {
-      LOG.info(":::END RabbitMQSequenceSink append()");
-    }
   }
 
 }
