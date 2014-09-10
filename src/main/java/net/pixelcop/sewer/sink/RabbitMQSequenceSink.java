@@ -30,7 +30,7 @@ import net.pixelcop.sewer.SendRabbitMQTopic;
 @DrainSink
 public class RabbitMQSequenceSink extends SequenceFileSink {
 
-  private static final Logger LOG = LoggerFactory.getLogger(SequenceFileSink.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RabbitMQSequenceSink.class);
 
   private static final VLongWritable ONE = new VLongWritable(1L);
 
