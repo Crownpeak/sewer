@@ -51,10 +51,11 @@ public class RabbitMQSequenceSink extends SequenceFileSink {
   protected Writer writer;
 
   public RabbitMQSequenceSink(String[] args) {
+    super(args);
+
     if (LOG.isInfoEnabled()) {
       LOG.info(":::START RabbitMQSequenceSink Constructor");
     }
-    super(args);
     //RabbitMQ
     sendRabbit = new SendRabbitMQTopic();
     //end
