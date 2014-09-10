@@ -22,6 +22,8 @@ import java.io.IOException;
 public class SendRabbitMQTopic {
 
     private String propInput = "config.properties";
+    private static final Logger LOG = LoggerFactory.getLogger(SendRabbitMQTopic.class);
+
 
     private Properties prop = new Properties();
     private ConnectionFactory factory;
