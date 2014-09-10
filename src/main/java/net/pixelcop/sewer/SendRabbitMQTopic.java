@@ -31,6 +31,10 @@ public class SendRabbitMQTopic {
     private int PORT_NUMBER;
     private String ROUTING_KEY;
 
+    private String USERNAME;
+    private String PASSWORD;
+    private String VIRTUAL_HOST;
+
     public SendRabbitMQTopic() {
     	loadProperties();
     	EXCHANGE_NAME = prop.getProperty("rmq.exchange.name");
@@ -39,9 +43,17 @@ public class SendRabbitMQTopic {
         PORT_NUMBER = Integer.parseInt( prop.getProperty("rmq.port.number") );
         ROUTING_KEY = prop.getProperty("rmq.routing.key");
 
+        USERNAME = prop.getProperty("rmq.username");
+        PASSWORD = prop.getProperty("rmq.password");
+        VIRTUAL_HOST = prop.getProperty("rmq.virtual.host");
+
     	factory = new ConnectionFactory();
         factory.setHost(HOST_NAME);
         factory.setPort(PORT_NUMBER);
+
+        factory.setUsername(USERNAME);
+        factory.setPassword(PASSWORD);
+        factory.setVirtualHost(VIRTUAL_HOST);
 
     }
 
