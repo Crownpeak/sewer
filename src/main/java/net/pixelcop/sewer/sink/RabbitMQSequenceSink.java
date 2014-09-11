@@ -22,9 +22,9 @@ import net.pixelcop.sewer.SendRabbitMQTopic;
 //end of rabbitmq imports
 
 /**
- * A sink which writes to a {@link SequenceFile}, on any filesystem supported by hadoop.
+ * A sink which writes to a {@link SequenceFile}, on any filesystem supported by hadoop, and also writes to rabbitmq.
  *
- * @author chetan
+ * @author richard craparotta
  *
  */
 @DrainSink
@@ -77,6 +77,10 @@ public class RabbitMQSequenceSink extends SequenceFileSink {
   public void append(Event event) throws IOException {
     super.append(event);
     //RabbitMQ
+    String eventString = event.toString();
+    if (LOG.isInfoEnabled()) {
+      LOG.info( eventString );
+    }
     sendRabbit.sendMessage("This is a test message of routingKey of: l.ghostery.com");
     //end
   }
