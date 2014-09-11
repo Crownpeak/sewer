@@ -40,10 +40,7 @@ public class SendRabbitMQTopic {
     private String PASSWORD;
     private String VIRTUAL_HOST;
 
-    public SendRabbitMQTopic() {
-        if (LOG.isInfoEnabled())
-            LOG.info(":::START RMQ Constructor");
-        
+    public SendRabbitMQTopic() {        
     	loadProperties();
     	EXCHANGE_NAME = prop.getProperty("rmq.exchange.name");
     	EXCHANGE_TYPE = prop.getProperty("rmq.exchange.type");
@@ -62,59 +59,50 @@ public class SendRabbitMQTopic {
         factory.setUsername(USERNAME);
         factory.setPassword(PASSWORD);
         factory.setVirtualHost(VIRTUAL_HOST);
-        if (LOG.isInfoEnabled())
-            LOG.info(":::END RMQ Constructor");
-
     }
 
     public void sendMessage(String message) {
-        if (LOG.isInfoEnabled())
-            LOG.info(":::START RMQ sendMessage");
         try{    
             channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
-            if (LOG.isInfoEnabled())
-                LOG.info(":::END RMQ sendMessage");
         } catch (IOException e) {
             e.printStackTrace();
         }  
     }
     
     public void open() {
-        if (LOG.isInfoEnabled())
-            LOG.info(":::START RMQ open");
         try {
             connection = factory.newConnection();
             channel = connection.createChannel();
             channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
-            if (LOG.isInfoEnabled())
-                LOG.info(":::END RMQ open");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void close(){
-        if (LOG.isInfoEnabled())
-            LOG.info(":::START RMQ close");
         try {
             channel.close();
             connection.close();
-            if (LOG.isInfoEnabled())
-                LOG.info(":::END RMQ close");
         } catch (IOException e) {
             e.printStackTrace();
         } 
     }
 
+    public String getHostFrom(String eventString) {
+        String temp = eventString;
+        temp = temp.replace("\t\t","\t \t");
+        String[] eventArray = temp.split("\t");
+        String host = eventArray[3];
+        if( LOG.isInfoEnabled() )
+          LOG.info( "::: Host: "+host );
+        return host;
+    }
+
 	private void loadProperties() {
-        if (LOG.isInfoEnabled())
-            LOG.info(":::START RMQ loadProperties");
 		prop = new Properties();	 
 		try {
             File file = new File(SendRabbitMQTopic.class.getClassLoader().getResource( propInput ).toURI());
             prop.load( new FileInputStream( file ) );
-            if (LOG.isInfoEnabled())
-                LOG.info(":::END RMQ loadProperties");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (URISyntaxException e) {

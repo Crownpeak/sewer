@@ -55,7 +55,6 @@ public class SequenceFileSink extends BucketedSink {
     //RabbitMQ
     sendRabbit = new SendRabbitMQTopic();
     //end
-
   }
 
   @Override
@@ -133,20 +132,10 @@ public class SequenceFileSink extends BucketedSink {
   @Override
   public void append(Event event) throws IOException {
     writer.append(event, ONE);
-    String eventString = event.toString();
-    
-    String temp = eventString;
-    temp = temp.replace("\t\t","\t \t");
-    String[] eventArray = temp.split("\t");
-    String host = eventArray[3];
-    if( LOG.isInfoEnabled() ) {
-      LOG.info( "*********************************************************************************" );
-      LOG.info( "::: Host: "+host );
-      LOG.info( "*********************************************************************************" );
-    }
-
     //RabbitMQ
-    sendRabbit.sendMessage(eventString);
+    String eventString = event.toString();
+    String host = sendRabbit.getHostFrom(eventString);
+    sendRabbit.sendMessage(eventString,host);
     //end
   }
 

@@ -76,15 +76,10 @@ public class RabbitMQSequenceSink extends SequenceFileSink {
   @Override
   public void append(Event event) throws IOException {
     super.append(event);
-    //RabbitMQ    
+    //RabbitMQ
     String eventString = event.toString();
-    if( LOG.isInfoEnabled() ) {
-      LOG.info( "*********************************************************************************" );
-      LOG.info( "*********************************************************************************" );
-      LOG.info( "::: "+eventString );
-      LOG.info( "*********************************************************************************" );
-      LOG.info( "*********************************************************************************" );
-    }
+    String host = sendRabbit.getHostFrom(eventString);
+    //sendRabbit.sendMessage(eventString,host);
     sendRabbit.sendMessage("This is a test message from RabbitMQSequenceSink of routingKey of: l.ghostery.com");
     //end
   }
