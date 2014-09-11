@@ -135,8 +135,10 @@ public class SequenceFileSink extends BucketedSink {
     writer.append(event, ONE);
     String eventString = event.toString();
     
-    String[] eventArray = eventString.split("\t");
-    String host = eventArray[2];
+    String temp = eventString;
+    temp = temp.replace("\t\t","\t \t");
+    String[] eventArray = temp.split("\t");
+    String host = eventArray[3];
     if( LOG.isInfoEnabled() ) {
       LOG.info( "*********************************************************************************" );
       LOG.info( "::: Host: "+host );
