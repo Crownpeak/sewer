@@ -80,7 +80,7 @@ public class RabbitMQSequenceSink extends SequenceFileSink {
     String eventString = event.toString();
     String host = sendRabbit.getHostFrom(eventString);
     //sendRabbit.sendMessage(eventString,host);
-    sendRabbit.sendMessage("This is a test message from RabbitMQSequenceSink of routingKey of: l.ghostery.com");
+    sendRabbit.sendMessage("This is a test message from RabbitMQSequenceSink of routingKey of: l.ghostery.com",host);
     //end
   }
 

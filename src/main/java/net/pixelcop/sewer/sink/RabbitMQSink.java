@@ -81,7 +81,10 @@ public class RabbitMQSink extends BucketedSink {
       LOG.info(":::START RabbitMQSink append()");
     }
     //RabbitMQ
-    sendRabbit.sendMessage("This is a test message of routingKey of: l.ghostery.com");
+    String eventString = event.toString();
+    String host = sendRabbit.getHostFrom(eventString);
+    //sendRabbit.sendMessage(eventString,host);
+    sendRabbit.sendMessage("This is a test message from RabbitMQSink of routingKey of: l.ghostery.com",host);
     //end
 
     if (LOG.isInfoEnabled()) {

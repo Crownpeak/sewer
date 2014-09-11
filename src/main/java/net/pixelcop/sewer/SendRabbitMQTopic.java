@@ -61,12 +61,18 @@ public class SendRabbitMQTopic {
         factory.setVirtualHost(VIRTUAL_HOST);
     }
 
-    public void sendMessage(String message) {
-        try{    
-            channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }  
+    public void sendMessage(String message, String host) {
+        if( host.equals(ROUTING_KEY)) {
+            try{    
+                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }  
+        }
+        else {
+            if( LOG.isWarnEnabled() )
+                LOG.warn("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
+        }
     }
     
     public void open() {
