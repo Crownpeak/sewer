@@ -133,6 +133,7 @@ public class SequenceFileSink extends BucketedSink {
   @Override
   public void append(Event event) throws IOException {
     writer.append(event, ONE);
+    String eventString = event.toString();
     if( LOG.isInfoEnabled() ) {
       LOG.info( "*********************************************************************************" );
       LOG.info( "*********************************************************************************" );
