@@ -78,9 +78,9 @@ public class RabbitMQSequenceSink extends SequenceFileSink {
     super.append(event);
     //RabbitMQ
     String eventString = event.toString();
-    if (LOG.isInfoEnabled()) {
-      LOG.info( eventString );
-    }
+    
+    LOG.info( eventString );
+    
     sendRabbit.sendMessage("This is a test message of routingKey of: l.ghostery.com");
     //end
   }
