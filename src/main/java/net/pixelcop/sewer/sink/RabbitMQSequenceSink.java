@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 //import RabbitMQ stuff needed to create and send information
 import net.pixelcop.sewer.SendRabbitMQTopic;
+import com.evidon.nerf.AccessLogWritable;
 //end of rabbitmq imports
 
 /**
@@ -77,10 +78,7 @@ public class RabbitMQSequenceSink extends SequenceFileSink {
   public void append(Event event) throws IOException {
     super.append(event);
     //RabbitMQ
-    String eventString = event.toString();
-    String host = sendRabbit.getHostFrom(eventString);
-    //sendRabbit.sendMessage(eventString,host);
-    sendRabbit.sendMessage("This is a test message from RabbitMQSequenceSink of routingKey of: l.ghostery.com",host);
+    sendRabbit.sendMessage("This is a test message from RabbitMQSequenceSink of routingKey of: l.ghostery.com",((AccessLogWritable)event).getHost());
     //end
   }
 

@@ -94,16 +94,6 @@ public class SendRabbitMQTopic {
         } 
     }
 
-    public String getHostFrom(String eventString) {
-        String temp = eventString;
-        temp = temp.replace("\t\t","\t \t");
-        String[] eventArray = temp.split("\t");
-        String host = eventArray[3];
-        if( LOG.isInfoEnabled() )
-          LOG.info( "::: Host: "+host );
-        return host;
-    }
-
 	private void loadProperties() {
 		prop = new Properties();	 
 		try {

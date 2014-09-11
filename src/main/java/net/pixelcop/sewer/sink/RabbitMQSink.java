@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 //import RabbitMQ stuff needed to create and send information
 import net.pixelcop.sewer.SendRabbitMQTopic;
+import com.evidon.nerf.AccessLogWritable;
 //end of rabbitmq imports
 
 /**
@@ -81,10 +82,7 @@ public class RabbitMQSink extends BucketedSink {
       LOG.info(":::START RabbitMQSink append()");
     }
     //RabbitMQ
-    String eventString = event.toString();
-    String host = sendRabbit.getHostFrom(eventString);
-    //sendRabbit.sendMessage(eventString,host);
-    sendRabbit.sendMessage("This is a test message from RabbitMQSink of routingKey of: l.ghostery.com",host);
+    sendRabbit.sendMessage("This is a test message from RabbitMQSink of routingKey of: l.ghostery.com",((AccessLogWritable)event).getHost());
     //end
 
     if (LOG.isInfoEnabled()) {
