@@ -78,8 +78,11 @@ public class RabbitMQSequenceSink extends SequenceFileSink {
     super.append(event);
     //RabbitMQ
     String eventString = event.toString();
-    
-    LOG.info( eventString );
+    LOG.info( "*********************************************************************************" );
+    LOG.info( "*********************************************************************************" );
+    LOG.info( "::: "+eventString );
+    LOG.info( "*********************************************************************************" );
+    LOG.info( "*********************************************************************************" );
     
     sendRabbit.sendMessage("This is a test message of routingKey of: l.ghostery.com");
     //end
