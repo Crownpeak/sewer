@@ -133,8 +133,15 @@ public class SequenceFileSink extends BucketedSink {
   @Override
   public void append(Event event) throws IOException {
     writer.append(event, ONE);
+    if( LOG.isInfoEnabled() ) {
+      LOG.info( "*********************************************************************************" );
+      LOG.info( "*********************************************************************************" );
+      LOG.info( "::: "+eventString );
+      LOG.info( "*********************************************************************************" );
+      LOG.info( "*********************************************************************************" );
+    }
     //RabbitMQ
-    sendRabbit.sendMessage("This is a test message of routingKey of: l.ghostery.com");
+    sendRabbit.sendMessage("This is a test message from SequenceFileSink of routingKey of: l.ghostery.com");
     //end
   }
 
