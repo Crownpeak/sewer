@@ -46,6 +46,8 @@ public class SendRabbitMQTopic {
     private boolean CONFIRMS;
 
     public SendRabbitMQTopic() {        
+        if( LOG.isInfoEnabled() )
+            LOG.ing("RABBITMQ: initializing...");
     	loadProperties();
     	EXCHANGE_NAME = prop.getProperty("rmq.exchange.name");
     	EXCHANGE_TYPE = prop.getProperty("rmq.exchange.type");
@@ -72,6 +74,8 @@ public class SendRabbitMQTopic {
     }
 
     public void sendMessage(String message, String host) {
+        if( LOG.isInfoEnabled() )
+            LOG.ing("RABBITMQ: in sendMessage.");
         if( host.equals(ROUTING_KEY)) {
             try{    
                 channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
@@ -97,6 +101,8 @@ public class SendRabbitMQTopic {
     }
     
     public void open() {
+        if( LOG.isInfoEnabled() )
+            LOG.ing("RABBITMQ: in open.");
         try {
             connection = factory.newConnection();
             channel = connection.createChannel();
@@ -132,6 +138,8 @@ public class SendRabbitMQTopic {
     }
 
     public void close(){
+        if( LOG.isInfoEnabled() )
+            LOG.ing("RABBITMQ: in close.");
         try {
             channel.close();
             connection.close();
@@ -141,6 +149,8 @@ public class SendRabbitMQTopic {
     }
 
 	private void loadProperties() {
+        if( LOG.isInfoEnabled() )
+            LOG.ing("RABBITMQ: in loadProperties.");
 		prop = new Properties();	 
 		try {
             File file = new File(SendRabbitMQTopic.class.getClassLoader().getResource( propInput ).toURI());
