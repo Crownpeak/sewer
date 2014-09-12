@@ -7,6 +7,7 @@ import net.pixelcop.sewer.sink.DfsSink;
 import net.pixelcop.sewer.sink.MeterSink;
 import net.pixelcop.sewer.sink.SequenceFileSink;
 import net.pixelcop.sewer.sink.SequenceFileWithRabbitMQSink;
+import net.pixelcop.sewer.sink.SequenceFileWithRabbitMQConfirmSink;
 import net.pixelcop.sewer.sink.TcpWriteableEventSink;
 import net.pixelcop.sewer.sink.buffer.AsyncBufferSink;
 import net.pixelcop.sewer.sink.buffer.BufferPoolSink;
@@ -31,6 +32,7 @@ public class SinkRegistry {
     register("dfs", DfsSink.class);
     register("seqfile", SequenceFileSink.class);
     register("seqfile_rabbit", SequenceFileWithRabbitMQSink.class);
+    register("seqfile_rabbit_confirm", SequenceFileWithRabbitMQConfirmSink.class);
     register("reliableseq", ReliableSequenceFileSink.class);
     register("tcpwrite", TcpWriteableEventSink.class);
 

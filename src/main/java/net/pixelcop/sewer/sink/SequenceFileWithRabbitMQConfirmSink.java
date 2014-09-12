@@ -29,7 +29,7 @@ import com.evidon.nerf.AccessLogWritable;
  *
  */
 @DrainSink
-public class SequenceFileWithRabbitMQSink extends BucketedSink {
+public class SequenceFileWithRabbitMQConfirmSink extends BucketedSink {
 
   private static final Logger LOG = LoggerFactory.getLogger(SequenceFileSink.class);
 
@@ -51,10 +51,10 @@ public class SequenceFileWithRabbitMQSink extends BucketedSink {
 
   protected Writer writer;
 
-  public SequenceFileWithRabbitMQSink(String[] args) {
+  public SequenceFileWithRabbitMQConfirmSink(String[] args) {
     this.configPath = args[0];
     //RabbitMQ
-    sendRabbit = new SendRabbitMQTopic(false);
+    sendRabbit = new SendRabbitMQTopic(true);
     //end
   }
 

@@ -40,7 +40,12 @@ public class SendRabbitMQTopic {
     private String PASSWORD;
     private String VIRTUAL_HOST;
 
-    public SendRabbitMQTopic() {        
+    private String QUEUE_NAME;
+    private String QUEUE_CONFIRM_NAME;
+
+    private boolean CONFIRMS = false;
+
+    public SendRabbitMQTopic(boolean confirms) {        
     	loadProperties();
     	EXCHANGE_NAME = prop.getProperty("rmq.exchange.name");
     	EXCHANGE_TYPE = prop.getProperty("rmq.exchange.type");
@@ -52,6 +57,9 @@ public class SendRabbitMQTopic {
         PASSWORD = prop.getProperty("rmq.password");
         VIRTUAL_HOST = prop.getProperty("rmq.virtual.host");
 
+        QUEUE_NAME = prop.getProperty("rmq.queue.name");
+        QUEUE_CONFIRM_NAME = prop.getProperty("rmq.queue.confirm.name");
+
     	factory = new ConnectionFactory();
         factory.setHost(HOST_NAME);
         factory.setPort(PORT_NUMBER);
@@ -59,15 +67,23 @@ public class SendRabbitMQTopic {
         factory.setUsername(USERNAME);
         factory.setPassword(PASSWORD);
         factory.setVirtualHost(VIRTUAL_HOST);
+
+        CONFIRMS = confirms;
     }
 
     public void sendMessage(String message, String host) {
         if( host.equals(ROUTING_KEY)) {
             try{    
                 channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+
+                //for testing between using confirms or norm queue
+                if( CONFIRMS)
+                    channel.waitForConfirmsOrDie();
             } catch (IOException e) {
                 e.printStackTrace();
-            }  
+            }  catch( InterruptedException e ) {
+                 e.printStackTrace();
+            }
         }
         else {
             if( LOG.isWarnEnabled() )
@@ -80,6 +96,31 @@ public class SendRabbitMQTopic {
             connection = factory.newConnection();
             channel = connection.createChannel();
             channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
+
+            //test code for easy switching between confirms queue and normal queue
+            if(CONFIRMS)
+                createQueueConfirm();
+            else
+                createQueue();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void createQueueConfirm() {
+        try {
+            channel.queueDeclare(QUEUE_CONFIRM_NAME, true, false, false, null);
+            channel.confirmSelect();
+            channel.queueBind(QUEUE_CONFIRM_NAME, EXCHANGE_NAME, ROUTING_KEY);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void createQueue() {
+        try {
+            channel.queueDeclare(QUEUE_NAME, true, false, false, null);
+            channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, ROUTING_KEY);
         } catch (IOException e) {
             e.printStackTrace();
         }
