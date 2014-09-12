@@ -78,6 +78,8 @@ public class SendRabbitMQTopic {
 
                 //for testing between using confirms or norm queue
                 if( CONFIRMS) {
+                    if( LOG.isWarnEnabled() )
+                        LOG.warn("RABBITMQ CONFIRMS: calling waitForConfirms.");
                     boolean test = channel.waitForConfirms();
                     if( LOG.isWarnEnabled() )
                         LOG.warn("RABBITMQ CONFIRMS: Return value of waitForConfirms: "+test);
