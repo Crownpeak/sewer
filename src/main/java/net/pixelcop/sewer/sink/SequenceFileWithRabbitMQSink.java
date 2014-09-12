@@ -54,7 +54,7 @@ public class SequenceFileWithRabbitMQSink extends BucketedSink {
   public SequenceFileWithRabbitMQSink(String[] args) {
     this.configPath = args[0];
     //RabbitMQ
-    sendRabbit = new SendRabbitMQTopic(false);
+    sendRabbit = new SendRabbitMQTopic();
     //end
   }
 

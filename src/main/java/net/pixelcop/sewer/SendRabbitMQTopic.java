@@ -43,9 +43,9 @@ public class SendRabbitMQTopic {
     private String QUEUE_NAME;
     private String QUEUE_CONFIRM_NAME;
 
-    private boolean CONFIRMS = false;
+    private boolean CONFIRMS;
 
-    public SendRabbitMQTopic(boolean confirms) {        
+    public SendRabbitMQTopic() {        
     	loadProperties();
     	EXCHANGE_NAME = prop.getProperty("rmq.exchange.name");
     	EXCHANGE_TYPE = prop.getProperty("rmq.exchange.type");
@@ -60,6 +60,8 @@ public class SendRabbitMQTopic {
         QUEUE_NAME = prop.getProperty("rmq.queue.name");
         QUEUE_CONFIRM_NAME = prop.getProperty("rmq.queue.confirm.name");
 
+        CONFIRMS = Boolean.parseBoolean( prop.getProperty("rmq.queue.is.confirm") );
+
     	factory = new ConnectionFactory();
         factory.setHost(HOST_NAME);
         factory.setPort(PORT_NUMBER);
@@ -67,8 +69,6 @@ public class SendRabbitMQTopic {
         factory.setUsername(USERNAME);
         factory.setPassword(PASSWORD);
         factory.setVirtualHost(VIRTUAL_HOST);
-
-        CONFIRMS = confirms;
     }
 
     public void sendMessage(String message, String host) {
