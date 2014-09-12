@@ -77,8 +77,11 @@ public class SendRabbitMQTopic {
                 channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
 
                 //for testing between using confirms or norm queue
-                if( CONFIRMS)
-                    channel.waitForConfirmsOrDie();
+                if( CONFIRMS) {
+                    boolean test = channel.waitForConfirms();
+                    if( LOG.isWarnEnabled() )
+                        LOG.warn("RABBITMQ CONFIRMS: Return value of waitForConfirms: "+test);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }  catch( InterruptedException e ) {
