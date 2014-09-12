@@ -43,7 +43,7 @@ public class SendRabbitMQTopic {
     private String QUEUE_NAME;
     private String QUEUE_CONFIRM_NAME;
 
-    private boolean CONFIRMS;
+    private boolean CONFIRMS=false;
 
     public SendRabbitMQTopic() {        
         if( LOG.isInfoEnabled() )
@@ -63,6 +63,8 @@ public class SendRabbitMQTopic {
         QUEUE_CONFIRM_NAME = prop.getProperty("rmq.queue.confirm.name");
 
         CONFIRMS = Boolean.parseBoolean( prop.getProperty("rmq.queue.is.confirm") );
+        if( LOG.isInfoEnabled() )
+            LOG.info("RABBITMQ: CONFIRMS = "+CONFIRMS);
 
     	factory = new ConnectionFactory();
         factory.setHost(HOST_NAME);
