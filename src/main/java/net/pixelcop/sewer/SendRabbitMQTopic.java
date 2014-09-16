@@ -46,8 +46,6 @@ public class SendRabbitMQTopic {
     private boolean CONFIRMS=false;
 
     public SendRabbitMQTopic() {        
-        if( LOG.isInfoEnabled() )
-            LOG.info("RABBITMQ: initializing...");
     	loadProperties();
     	EXCHANGE_NAME = prop.getProperty("rmq.exchange.name");
     	EXCHANGE_TYPE = prop.getProperty("rmq.exchange.type");
@@ -63,8 +61,6 @@ public class SendRabbitMQTopic {
         QUEUE_CONFIRM_NAME = prop.getProperty("rmq.queue.confirm.name");
 
         CONFIRMS = Boolean.parseBoolean( prop.getProperty("rmq.queue.is.confirm") );
-        if( LOG.isInfoEnabled() )
-            LOG.info("RABBITMQ: CONFIRMS = "+CONFIRMS);
 
     	factory = new ConnectionFactory();
         factory.setHost(HOST_NAME);
@@ -76,19 +72,13 @@ public class SendRabbitMQTopic {
     }
 
     public void sendMessage(String message, String host) {
-        if( LOG.isInfoEnabled() )
-            LOG.info("RABBITMQ: in sendMessage.");
         if( host.equals(ROUTING_KEY)) {
             try{    
                 channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
 
                 //for testing between using confirms or norm queue
                 if( CONFIRMS) {
-                    if( LOG.isWarnEnabled() )
-                        LOG.warn("RABBITMQ CONFIRMS: calling waitForConfirms.");
                     boolean test = channel.waitForConfirms();
-                    if( LOG.isWarnEnabled() )
-                        LOG.warn("RABBITMQ CONFIRMS: Return value of waitForConfirms: "+test);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -97,14 +87,12 @@ public class SendRabbitMQTopic {
             }
         }
         else {
-            if( LOG.isWarnEnabled() )
-                LOG.warn("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
+            if( LOG.isDebugEnabled() )
+                LOG.debug("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
         }
     }
     
     public void open() {
-        if( LOG.isInfoEnabled() )
-            LOG.info("RABBITMQ: in open.");
         try {
             connection = factory.newConnection();
             channel = connection.createChannel();
@@ -140,8 +128,6 @@ public class SendRabbitMQTopic {
     }
 
     public void close(){
-        if( LOG.isInfoEnabled() )
-            LOG.info("RABBITMQ: in close.");
         try {
             channel.close();
             connection.close();
@@ -151,8 +137,6 @@ public class SendRabbitMQTopic {
     }
 
 	private void loadProperties() {
-        if( LOG.isInfoEnabled() )
-            LOG.info("RABBITMQ: in loadProperties.");
 		prop = new Properties();	 
 		try {
             File file = new File(SendRabbitMQTopic.class.getClassLoader().getResource( propInput ).toURI());
