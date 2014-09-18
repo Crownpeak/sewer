@@ -44,6 +44,7 @@ public class SendRabbitMQTopic {
     private String QUEUE_CONFIRM_NAME;
 
     private boolean CONFIRMS=false;
+    private int ATTEMPTS=1;
 
     public SendRabbitMQTopic() {        
     	loadProperties();
@@ -61,6 +62,7 @@ public class SendRabbitMQTopic {
         QUEUE_CONFIRM_NAME = prop.getProperty("rmq.queue.confirm.name");
 
         CONFIRMS = Boolean.parseBoolean( prop.getProperty("rmq.queue.is.confirm") );
+        ATTEMPTS = Integer.parseInt( prop.getProperty("rmp.send.attempts"));
 
     	factory = new ConnectionFactory();
         factory.setHost(HOST_NAME);
@@ -69,21 +71,59 @@ public class SendRabbitMQTopic {
         factory.setUsername(USERNAME);
         factory.setPassword(PASSWORD);
         factory.setVirtualHost(VIRTUAL_HOST);
+
+        // factory.setRequestedHeartbeat(true);
     }
 
     public void sendMessage(String message, String host) {
         if( host.equals(ROUTING_KEY)) {
-            try{    
-                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+            String errorMessage = "";
+            boolean finished = false;
+            int attempt = 1;
+            if( ATTEMPTS > 0) {
+                while( !finished ) {
+                    errorMessage="";
+                    try{    
+                        channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
 
-                //for testing between using confirms or norm queue
-                if( CONFIRMS) {
-                    boolean test = channel.waitForConfirms();
+                        //for testing between using confirms or norm queue
+                        if( CONFIRMS) {
+                            boolean test = channel.waitForConfirms();
+                        }
+                        finished=true;
+                    } catch (IOException e) {
+                        //e.printStackTrace();
+                        errorMessage=e.getMessage();
+                    }  catch( InterruptedException e ) {
+                         //e.printStackTrace();
+                         errorMessage=e.getMessage();
+                    }
+                    attempt++;
+                    if( attempt > ATTEMPTS)
+                        break;    
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }  catch( InterruptedException e ) {
-                 e.printStackTrace();
+                if( !errorMessage.equals("") ) {
+                    LOG.error("RABBITMQ: Message could not be sent. Attempts: "+attempt + "\n" + message + "\n" + errorMessage);
+                }
+                else if( attempt > 1 ) {
+                    LOG.warn("RABBITMQ: Attempts to send message: "+attempt+ "\n" + message);
+                }
+            }
+            else {
+                try{    
+                    channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+                    //for testing between using confirms or norm queue
+                    if( CONFIRMS) {
+                        boolean test = channel.waitForConfirms();
+                    }
+                    finished=true;
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                    errorMessage=e.getMessage();
+                }  catch( InterruptedException e ) {
+                     //e.printStackTrace();
+                     errorMessage=e.getMessage();
+                }
             }
         }
         else {
