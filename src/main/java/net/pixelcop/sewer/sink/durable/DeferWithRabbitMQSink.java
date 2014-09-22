@@ -2,6 +2,7 @@ package net.pixelcop.sewer.sink.durable;
 
 import java.io.IOException;
 
+import net.pixelcop.sewer.Event;
 import net.pixelcop.sewer.sink.BucketedSink;
 import net.pixelcop.sewer.sink.SequenceFileWithRabbitMQSink;
 
@@ -24,6 +25,24 @@ public class DeferWithRabbitMQSink extends DeferSink {
 	super(args);
   }
 
+  @Override
+  public void close() throws IOException {
+    LOG.debug("closing");
+    setStatus(CLOSING);
+
+    try {
+      durableSink.close();
+    } catch (IOException e) {
+      LOG.warn("Failed to close durable sink", e);
+      // will proceed with rollback anyway
+    }
+
+    tx.rollback(); // always rollback!
+
+    setStatus(CLOSED);
+    LOG.debug("closed");
+  }
+  
   @Override
   public void open() throws IOException {
     LOG.debug("opening");
@@ -48,6 +67,11 @@ public class DeferWithRabbitMQSink extends DeferSink {
 
     setStatus(FLOWING);
     LOG.debug("flowing");
+  }
+  
+  @Override
+  public void append(Event event) throws IOException {
+	    durableSink.append(event);
   }
 
 }
