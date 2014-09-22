@@ -13,6 +13,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Properties;
 
+import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +79,7 @@ public class SendRabbitMQTopic {
                 //for testing between using confirms or norm queue
                 if( CONFIRMS) {
                     boolean test = channel.waitForConfirms();
+                    LOG.info("RABBITMQ: Message ACKED? : "+test+"\n\t"+message);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
