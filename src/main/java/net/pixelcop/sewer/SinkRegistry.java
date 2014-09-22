@@ -17,6 +17,7 @@ import net.pixelcop.sewer.sink.debug.ConsoleSink;
 import net.pixelcop.sewer.sink.debug.DelayedOpenSink;
 import net.pixelcop.sewer.sink.debug.NullSink;
 import net.pixelcop.sewer.sink.durable.DeferSink;
+import net.pixelcop.sewer.sink.durable.DeferWithRabbitMQSink;
 import net.pixelcop.sewer.sink.durable.ReliableSequenceFileSink;
 import net.pixelcop.sewer.sink.durable.ReliableSink;
 import net.pixelcop.sewer.sink.durable.RollSink;
@@ -36,6 +37,7 @@ public class SinkRegistry {
 
     // decorators
     register("defer", DeferSink.class);
+    register("defer_rabbit", DeferWithRabbitMQSink.class);
     register("reliable", ReliableSink.class);
     register("roll", RollSink.class);
     register("delayed_open", DelayedOpenSink.class);

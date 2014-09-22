@@ -53,6 +53,8 @@ public class SequenceFileSink extends BucketedSink {
       LOG.debug("Closing: " + HdfsUtil.pathToString(dstPath));
     }
 
+    sendRabbitMessage();
+    
     if (writer != null) {
       writer.close();
     }
@@ -111,5 +113,7 @@ public class SequenceFileSink extends BucketedSink {
   public void append(Event event) throws IOException {
     writer.append(event, ONE);
   }
+  
+  public void sendRabbitMessage(){};
 
 }

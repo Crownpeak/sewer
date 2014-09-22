@@ -1,141 +1,102 @@
 package net.pixelcop.sewer.sink;
 
 import java.io.IOException;
-
+import java.util.ArrayList;
 import net.pixelcop.sewer.DrainSink;
 import net.pixelcop.sewer.Event;
-import net.pixelcop.sewer.node.Node;
-import net.pixelcop.sewer.util.HdfsUtil;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.SequenceFile.CompressionType;
-import org.apache.hadoop.io.SequenceFile.Writer;
-import org.apache.hadoop.io.VLongWritable;
-import org.apache.hadoop.io.compress.CompressionCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import RabbitMQ stuff needed to create and send information
 import net.pixelcop.sewer.SendRabbitMQTopic;
 import com.evidon.nerf.AccessLogWritable;
-//end of rabbitmq imports
 
 /**
- * A sink which writes to a {@link SequenceFile}, on any filesystem supported by hadoop.
- *
- * @author chetan
- *
+ * @author richard craparotta
  */
 @DrainSink
-public class SequenceFileWithRabbitMQSink extends BucketedSink {
+public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 
-  private static final Logger LOG = LoggerFactory.getLogger(SequenceFileSink.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SequenceFileWithRabbitMQSink.class);
 
-  private static final VLongWritable ONE = new VLongWritable(1L);
-
-   //RabbitMQ
   SendRabbitMQTopic sendRabbit;
-  //end
-
-  /**
-   * Configured path to write to
-   */
-  protected String configPath;
-
-  /**
-   * Reference to {@link Path} object
-   */
-  protected Path dstPath;
-
-  protected Writer writer;
+  ArrayList<MessageBatch> rabbitMessages = new ArrayList<MessageBatch>();
 
   public SequenceFileWithRabbitMQSink(String[] args) {
-    this.configPath = args[0];
-    //RabbitMQ
+	super(args);
     sendRabbit = new SendRabbitMQTopic();
-    //end
   }
 
   @Override
   public void close() throws IOException {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("close() called; currently: " + getStatusString());
-      LOG.debug("Closing: " + HdfsUtil.pathToString(dstPath));
-    }
-
-    if (writer != null) {
-      writer.close();
-    }
-    nextBucket = null;
-
-    //RabbitMQ
+    super.close();
     sendRabbit.close();
-    //end
-
-    setStatus(CLOSED);
-
-    if (LOG.isInfoEnabled()) {
-      LOG.info("Closed: " + HdfsUtil.pathToString(dstPath));
-    }
   }
 
   @Override
   public void open() throws IOException {
-    LOG.debug("open");
-    setStatus(OPENING);
-    if (nextBucket == null) {
-      generateNextBucket();
-    }
-    createWriter();
-
-    //RabbitMQ
+    super.open();
     sendRabbit.open();
-    //end
-
-    setStatus(FLOWING);
   }
-
-  protected void createWriter() throws IOException {
-
-    Configuration conf = Node.getInstance().getConf();
-
-    CompressionCodec codec = HdfsUtil.createCodec();
-    dstPath = new Path(nextBucket + ".seq");
-
-    writer = SequenceFile.createWriter(
-        conf,
-        Writer.file(dstPath),
-        Writer.keyClass(Node.getInstance().getSource().getEventClass()),
-        Writer.valueClass(VLongWritable.class),
-        Writer.compression(CompressionType.BLOCK, codec)
-        );
-
-    if (LOG.isInfoEnabled()) {
-      LOG.info("Opened: " + HdfsUtil.pathToString(dstPath));
-    }
-
-    nextBucket = null;
-  }
-
-  @Override
-  public String getFileExt() {
-    return ".seq";
-  }
-
-  @Override
-  public String generateNextBucket() {
-    nextBucket = BucketPath.escapeString(configPath);
-    return nextBucket;
-  }
-
+  
   @Override
   public void append(Event event) throws IOException {
-    writer.append(event, ONE);
-    //RabbitMQ
-    sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
-    //end
+    super.append(event);
+    
+    boolean added = false;
+    for( MessageBatch mb : rabbitMessages ) {
+    	if( mb.isHostMatch( ((AccessLogWritable)event).getHost() ) ) {
+    		mb.addEvent(event.toString());
+    		added = true;
+    		break;
+    	}
+    }
+    if( !added ) {
+    	MessageBatch mb = new MessageBatch( ((AccessLogWritable)event).getHost() );
+    	mb.addEvent(event.toString());
+    	rabbitMessages.add(mb);
+    }
+  }
+  
+  @Override
+  public void sendRabbitMessage() {
+	  for( MessageBatch mb : rabbitMessages ) {
+		  sendRabbit.sendMessage(mb.getAppendedMessage(),mb.getHost());
+	  }
+  }
+  
+  public class MessageBatch {
+	  
+	  String host;
+	  String eventDelimeter = "\n";
+	  ArrayList<String> events = new ArrayList<String>();
+	  
+	  public MessageBatch(String host) {
+		  this.host=host;
+	  }
+	  
+	  public String getHost() {
+		  return host;
+	  }
+	  
+	  public boolean isHostMatch(String s) {
+		  return host.equals(s);
+	  }
+	  
+	  public void addEvent(String event) {
+		  events.add(event);
+	  }
+	  
+	  public String getAppendedMessage() {
+		  String retVal = "";
+		  for( int i = 0; i < events.size(); i++) {
+			  retVal += events.get(i);
+			  if( i+1 < events.size() ) {
+				  retVal += eventDelimeter;
+			  } 
+		  }
+		  return retVal;
+	  }
+	  
   }
 
 }
