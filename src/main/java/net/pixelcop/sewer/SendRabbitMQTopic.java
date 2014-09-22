@@ -28,7 +28,7 @@ public class SendRabbitMQTopic {
 
     private Properties prop = new Properties();
     private ConnectionFactory factory;
-    private Channel channel;
+    private static Channel channel;
     private Connection connection;
 
     private String EXCHANGE_NAME;
@@ -95,8 +95,13 @@ public class SendRabbitMQTopic {
     
     public void open() {
         try {
-            connection = factory.newConnection();
-            channel = connection.createChannel();
+//        	if( connection == null )
+//        		connection = factory.newConnection();
+//        	else if( !connection.isOpen() ) {
+//        		connection.close();
+//        		connection = factory.newConnection();
+//        	}
+    		connection = factory.newConnection();
             channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
 
             //test code for easy switching between confirms queue and normal queue
@@ -104,6 +109,7 @@ public class SendRabbitMQTopic {
                 createQueueConfirm();
             else
                 createQueue();
+            
         } catch (IOException e) {
             e.printStackTrace();
         }

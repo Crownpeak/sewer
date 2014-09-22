@@ -42,27 +42,31 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   public void append(Event event) throws IOException {
     super.append(event);
     
-    boolean added = false;
-    for( MessageBatch mb : rabbitMessages ) {
-    	if( mb.isHostMatch( ((AccessLogWritable)event).getHost() ) ) {
-    		mb.addEvent(event.toString());
-    		added = true;
-    		break;
-    	}
-    }
-    if( !added ) {
-    	MessageBatch mb = new MessageBatch( ((AccessLogWritable)event).getHost() );
-    	mb.addEvent(event.toString());
-    	rabbitMessages.add(mb);
-    }
+	sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
+
+    
+//    boolean added = false;
+//    for( MessageBatch mb : rabbitMessages ) {
+//    	if( mb.isHostMatch( ((AccessLogWritable)event).getHost() ) ) {
+//    		mb.addEvent(event.toString());
+//    		added = true;
+//    		break;
+//    	}
+//    }
+//    if( !added ) {
+//    	MessageBatch mb = new MessageBatch( ((AccessLogWritable)event).getHost() );
+//    	mb.addEvent(event.toString());
+//    	rabbitMessages.add(mb);
+//    }
+	
   }
   
-  @Override
-  public void sendRabbitMessage() {
-	  for( MessageBatch mb : rabbitMessages ) {
-		  sendRabbit.sendMessage(mb.getAppendedMessage(),mb.getHost());
-	  }
-  }
+//  @Override
+//  public void sendRabbitMessage() {
+//	  for( MessageBatch mb : rabbitMessages ) {
+//		  sendRabbit.sendMessage(mb.getAppendedMessage(),mb.getHost());
+//	  }
+//  }
   
   public class MessageBatch {
 	  
