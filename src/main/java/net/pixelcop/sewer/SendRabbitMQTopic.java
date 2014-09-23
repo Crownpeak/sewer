@@ -29,7 +29,7 @@ public class SendRabbitMQTopic {
     private Properties prop = new Properties();
     private ConnectionFactory factory;
     private Channel channel;
-    private Connection connection;
+    private static Connection connection;
 
     private String EXCHANGE_NAME;
     private String EXCHANGE_TYPE;
@@ -95,13 +95,13 @@ public class SendRabbitMQTopic {
     
     public void open() {
         try {
-//        	if( connection == null )
-//        		connection = factory.newConnection();
-//        	else if( !connection.isOpen() ) {
-//        		connection.close();
-//        		connection = factory.newConnection();
-//        	}
-    		connection = factory.newConnection();
+        	if( connection == null) {
+        		connection = factory.newConnection();
+        	}
+        	else if( !connection.isOpen() ) {
+        		connection.close();
+        		connection = factory.newConnection();
+        	}
             channel = connection.createChannel();
             channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
 
@@ -137,7 +137,7 @@ public class SendRabbitMQTopic {
     public void close(){
         try {
             channel.close();
-            connection.close();
+//            connection.close();
         } catch (IOException e) {
             e.printStackTrace();
         } 
