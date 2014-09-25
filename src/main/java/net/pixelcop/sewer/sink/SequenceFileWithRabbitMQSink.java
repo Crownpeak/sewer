@@ -19,31 +19,32 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   private static final Logger LOG = LoggerFactory.getLogger(SequenceFileWithRabbitMQSink.class);
 
   SendRabbitMQTopic sendRabbit;
-  ArrayList<MessageBatch> rabbitMessages = new ArrayList<MessageBatch>();
+//  ArrayList<MessageBatch> rabbitMessages = new ArrayList<MessageBatch>();
 
   public SequenceFileWithRabbitMQSink(String[] args) {
 	super(args);
     sendRabbit = new SendRabbitMQTopic();
   }
 
-  @Override
-  public void close() throws IOException {
-    super.close();
-    sendRabbit.close();
-  }
-
-  @Override
-  public void open() throws IOException {
-    super.open();
-    sendRabbit.open();
-  }
+//  @Override
+//  public void close() throws IOException {
+//    super.close();
+//    sendRabbit.close();
+//  }
+//
+//  @Override
+//  public void open() throws IOException {
+//    super.open();
+//    sendRabbit.open();
+//  }
   
   @Override
   public void append(Event event) throws IOException {
     super.append(event);
     
+    sendRabbit.open();
 	sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
-
+	sendRabbit.close();
     
 //    boolean added = false;
 //    for( MessageBatch mb : rabbitMessages ) {
@@ -68,39 +69,39 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 //	  }
 //  }
   
-  public class MessageBatch {
-	  
-	  String host;
-	  String eventDelimeter = "\n";
-	  ArrayList<String> events = new ArrayList<String>();
-	  
-	  public MessageBatch(String host) {
-		  this.host=host;
-	  }
-	  
-	  public String getHost() {
-		  return host;
-	  }
-	  
-	  public boolean isHostMatch(String s) {
-		  return host.equals(s);
-	  }
-	  
-	  public void addEvent(String event) {
-		  events.add(event);
-	  }
-	  
-	  public String getAppendedMessage() {
-		  String retVal = "";
-		  for( int i = 0; i < events.size(); i++) {
-			  retVal += events.get(i);
-			  if( i+1 < events.size() ) {
-				  retVal += eventDelimeter;
-			  } 
-		  }
-		  return retVal;
-	  }
-	  
-  }
+//  public class MessageBatch {
+//	  
+//	  String host;
+//	  String eventDelimeter = "\n";
+//	  ArrayList<String> events = new ArrayList<String>();
+//	  
+//	  public MessageBatch(String host) {
+//		  this.host=host;
+//	  }
+//	  
+//	  public String getHost() {
+//		  return host;
+//	  }
+//	  
+//	  public boolean isHostMatch(String s) {
+//		  return host.equals(s);
+//	  }
+//	  
+//	  public void addEvent(String event) {
+//		  events.add(event);
+//	  }
+//	  
+//	  public String getAppendedMessage() {
+//		  String retVal = "";
+//		  for( int i = 0; i < events.size(); i++) {
+//			  retVal += events.get(i);
+//			  if( i+1 < events.size() ) {
+//				  retVal += eventDelimeter;
+//			  } 
+//		  }
+//		  return retVal;
+//	  }
+//	  
+//  }
 
 }

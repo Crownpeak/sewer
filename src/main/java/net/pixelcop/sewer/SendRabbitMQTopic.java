@@ -72,11 +72,10 @@ public class SendRabbitMQTopic {
         factory.setVirtualHost(VIRTUAL_HOST);
     }
 
-    public void sendMessage(String message, String host) {
+    public void sendMessage(String message, String host) {    	
         if( host.equals(ROUTING_KEY)) {
             try{    
                 channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
-                //for testing between using confirms or norm queue
                 if( CONFIRMS) {
                     boolean test = channel.waitForConfirms();
 //                    LOG.info("RABBITMQ: Message ACKED? : "+test+"\n\t"+message);
@@ -95,13 +94,6 @@ public class SendRabbitMQTopic {
     
     public void open() {
         try {
-//        	if( connection == null) {
-//        		connection = factory.newConnection();
-//        	}
-//        	else if( !connection.isOpen() ) {
-//        		connection.close();
-//        		connection = factory.newConnection();
-//        	}
     		connection = factory.newConnection();
             channel = connection.createChannel();
             channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
