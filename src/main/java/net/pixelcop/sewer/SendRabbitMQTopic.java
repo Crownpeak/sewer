@@ -137,8 +137,20 @@ public class SendRabbitMQTopic {
 
     public void close(){
         try {
-            channel.close();
-            connection.close();
+        	if( channel != null )
+        		if( channel.isOpen() )
+        			channel.close();
+        		else
+        			LOG.error("RABBITMQ: Channel is already closed.");
+        	else
+        		LOG.error("RABBITMQ: Channel is null.");
+        	if( connection != null)
+        		if( connection.isOpen() )
+        			connection.close();
+        		else
+        			LOG.error("RABBITMQ: Connection is already closed.");
+        	else
+        		LOG.error("RABBITMQ: Connection is null.");
         } catch (IOException e) {
             e.printStackTrace();
         } 
