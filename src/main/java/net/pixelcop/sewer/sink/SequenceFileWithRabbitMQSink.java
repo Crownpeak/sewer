@@ -26,25 +26,22 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     sendRabbit = new SendRabbitMQTopic();
   }
 
-//  @Override
-//  public void close() throws IOException {
-//    super.close();
-//    sendRabbit.close();
-//  }
-//
-//  @Override
-//  public void open() throws IOException {
-//    super.open();
-//    sendRabbit.open();
-//  }
+  @Override
+  public void close() throws IOException {
+	  sendRabbit.close();
+	  super.close();
+  }
+
+  @Override
+  public void open() throws IOException {
+    super.open();
+    sendRabbit.open();
+  }
   
   @Override
   public void append(Event event) throws IOException {
     super.append(event);
-    
-    sendRabbit.open();
-	sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
-	sendRabbit.close();
+   	sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
     
 //    boolean added = false;
 //    for( MessageBatch mb : rabbitMessages ) {
