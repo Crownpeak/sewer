@@ -79,7 +79,7 @@ public class DeferWithRabbitMQSink extends DeferSink {
 	    durableSink.append(event);
   }
   
-  private SendRabbitMQTopic sendRabbit;
+  private SendRabbitMQTopic sendRabbit = new SendRabbitMQTopic();
   public SendRabbitMQTopic getSendRabbit() {
 	  return sendRabbit;
   }
