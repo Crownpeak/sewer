@@ -59,8 +59,9 @@ public class DeferWithRabbitMQSink extends DeferSink {
     }
     this.tx = TransactionManager.getInstance().startTx(nextBucket);
     String durablePath = tx.createTxPath(false);
-    this.durableSink = new SequenceFileWithRabbitMQSink(new String[] { durablePath });
+    this.durableSink = new SequenceFileWithRabbitMQSink(new String[] { durablePath },this);
     this.durableSink.setSendRabbit(this);
+    LOG.info("Defer with RabbitMQ Sink: Set defer in sendRabbitMQTopic.");
 
     try {
       this.durableSink.open();

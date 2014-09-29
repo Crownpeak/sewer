@@ -23,8 +23,9 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   private DeferWithRabbitMQSink defer;
 //  private SendRabbitMQTopic sendRabbit;
 
-  public SequenceFileWithRabbitMQSink(String[] args) {
+  public SequenceFileWithRabbitMQSink(String[] args, DeferWithRabbitMQSink defer) {
 	super(args);
+	setSendRabbit(defer);
 //    sendRabbit = new SendRabbitMQTopic();
   }
 
