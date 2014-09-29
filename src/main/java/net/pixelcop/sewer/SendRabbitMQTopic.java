@@ -94,9 +94,25 @@ public class SendRabbitMQTopic {
     
     public void open() {
         try {
-    		connection = factory.newConnection();
-            channel = connection.createChannel();
-            channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
+        	if( connection == null) {
+        		LOG.info("RABBITMQ: Connection is null, creating new connection.");
+        		connection = factory.newConnection();
+        	}
+        	else if( !connection.isOpen() ) {
+        		LOG.info("RABBITMQ: Connection isn't open, creating new connection.");
+        		connection = factory.newConnection();
+        	}
+        	
+        	if( channel == null) {
+        		LOG.info("RABBITMQ: Channel is null, creating new connection.");
+        		channel = connection.createChannel();
+                channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
+        	}
+        	else if( !channel.isOpen() ) {
+        		LOG.info("RABBITMQ: Channel isn't open, creating new connection.");
+        		channel = connection.createChannel();
+                channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
+        	}       
 
             //test code for easy switching between confirms queue and normal queue
             if(CONFIRMS)
