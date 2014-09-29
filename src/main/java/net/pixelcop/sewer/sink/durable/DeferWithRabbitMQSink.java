@@ -3,7 +3,6 @@ package net.pixelcop.sewer.sink.durable;
 import java.io.IOException;
 
 import net.pixelcop.sewer.Event;
-import net.pixelcop.sewer.SendRabbitMQTopic;
 import net.pixelcop.sewer.sink.BucketedSink;
 import net.pixelcop.sewer.sink.SequenceFileWithRabbitMQSink;
 
@@ -28,12 +27,10 @@ public class DeferWithRabbitMQSink extends DeferSink {
 
   @Override
   public void close() throws IOException {
-	LOG.info("\n\n\nDEFER WITH RABBIT: CLOSING\n\n\n\n\n");
     LOG.debug("closing");
     setStatus(CLOSING);
 
     try {
-      this.getSendRabbit().close();
       durableSink.close();
     } catch (IOException e) {
       LOG.warn("Failed to close durable sink", e);
@@ -59,9 +56,7 @@ public class DeferWithRabbitMQSink extends DeferSink {
     }
     this.tx = TransactionManager.getInstance().startTx(nextBucket);
     String durablePath = tx.createTxPath(false);
-    this.durableSink = new SequenceFileWithRabbitMQSink(new String[] { durablePath },this);
-    this.durableSink.setSendRabbit(this);
-    LOG.info("Defer with RabbitMQ Sink: Set defer in sendRabbitMQTopic.");
+    this.durableSink = new SequenceFileWithRabbitMQSink(new String[] { durablePath });
 
     try {
       this.durableSink.open();
@@ -77,11 +72,6 @@ public class DeferWithRabbitMQSink extends DeferSink {
   @Override
   public void append(Event event) throws IOException {
 	    durableSink.append(event);
-  }
-  
-  private SendRabbitMQTopic sendRabbit = new SendRabbitMQTopic();
-  public SendRabbitMQTopic getSendRabbit() {
-	  return sendRabbit;
   }
 
 }

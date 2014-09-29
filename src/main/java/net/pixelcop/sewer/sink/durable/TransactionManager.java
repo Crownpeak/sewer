@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.pixelcop.sewer.DrainSink;
 import net.pixelcop.sewer.PlumbingBuilder;
 import net.pixelcop.sewer.PlumbingFactory;
+import net.pixelcop.sewer.SendRabbitMQTopic;
 import net.pixelcop.sewer.Sink;
 import net.pixelcop.sewer.node.ExitCodes;
 import net.pixelcop.sewer.node.Node;
@@ -42,6 +43,8 @@ public class TransactionManager extends Thread {
   public static final int STOPPED = 0;
   public static final int IDLE = 1;
   public static final int DRAINING = 2;
+  
+  public static final SendRabbitMQTopic sendRabbit = new SendRabbitMQTopic();
 
   /**
    * Singleton instance
