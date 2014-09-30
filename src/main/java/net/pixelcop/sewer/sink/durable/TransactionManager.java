@@ -44,6 +44,8 @@ public class TransactionManager extends Thread {
   public static final int IDLE = 1;
   public static final int DRAINING = 2;
   
+  public static final ArrayList<String> rabbitMessageQueue = new ArrayList<String>();
+  public static final String rabbitMessageDelimeter = ":::";
   public static final SendRabbitMQTopic sendRabbit = new SendRabbitMQTopic();
 
   /**
@@ -104,6 +106,7 @@ public class TransactionManager extends Thread {
     this.unreliableSinkFactory = createUnreliableSinkFactory();
     this.loadTransctionsFromDisk();
     this.setName("TxMan " + this.getId());
+    this.sendRabbit.start();
     this.start();
   }
 

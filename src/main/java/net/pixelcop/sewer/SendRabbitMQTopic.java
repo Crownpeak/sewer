@@ -11,7 +11,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.File;
 import java.net.URISyntaxException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
+
+import net.pixelcop.sewer.sink.durable.TransactionManager;
 
 import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
@@ -20,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 
-public class SendRabbitMQTopic {
+public class SendRabbitMQTopic extends Thread {
 
     private String propInput = "config.properties";
     private static final Logger LOG = LoggerFactory.getLogger(SendRabbitMQTopic.class);
@@ -43,6 +48,8 @@ public class SendRabbitMQTopic {
 
     private String QUEUE_NAME;
     private String QUEUE_CONFIRM_NAME;
+    
+    private int RETRIES;
 
     private boolean CONFIRMS=false;
 
@@ -60,6 +67,8 @@ public class SendRabbitMQTopic {
 
         QUEUE_NAME = prop.getProperty("rmq.queue.name");
         QUEUE_CONFIRM_NAME = prop.getProperty("rmq.queue.confirm.name");
+        
+        RETRIES = Integer.parseInt(prop.getProperty("rmq.send.retries"));
 
         CONFIRMS = Boolean.parseBoolean( prop.getProperty("rmq.queue.is.confirm") );
 
@@ -72,24 +81,27 @@ public class SendRabbitMQTopic {
         factory.setVirtualHost(VIRTUAL_HOST);
     }
 
-    public void sendMessage(String message, String host) {    	
+    public boolean sendMessage(String message, String host) {    	
         if( host.equals(ROUTING_KEY)) {
             try{    
                 channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
                 if( CONFIRMS) {
                     boolean test = channel.waitForConfirms();
-//                    LOG.info("RABBITMQ: Message ACKED? : "+test+"\n\t"+message);
+                    return test;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                LOG.warn("RABBITMQ: IOException in send message.\n"+e.getMessage());
             }  catch( InterruptedException e ) {
                  e.printStackTrace();
+                 LOG.warn("RABBITMQ: InterruptException in send message.\n"+e.getMessage());
             }
         }
         else {
             if( LOG.isDebugEnabled() )
                 LOG.debug("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
         }
+        return false;
     }
     
     public void open() {
@@ -174,5 +186,36 @@ public class SendRabbitMQTopic {
 		} catch (URISyntaxException e) {
             e.printStackTrace();
         }
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Date date = new Date();
+		while( true ) {
+			if( TransactionManager.rabbitMessageQueue.size() > 0 ) {
+				String fullMessage = TransactionManager.rabbitMessageQueue.get(0);
+				String message = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[0];
+				String host = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[1];
+				
+				boolean ack = false;
+//				for( int i = 0; i < RETRIES && !ack; i++) {
+				open();
+				ack = sendMessage(message , host);
+//				}
+				if(ack)
+					TransactionManager.rabbitMessageQueue.remove(0);
+				else
+                	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
+				
+			}
+			Date dateNow = new Date();
+			if((dateNow.getTime()-date.getTime())/1000 >= 15 ) {
+				if(TransactionManager.rabbitMessageQueue.size() >= 3 )
+					LOG.info("QueueSize: "+TransactionManager.rabbitMessageQueue.size() +"\n\t" + TransactionManager.rabbitMessageQueue.get(0) + "\n\t" + TransactionManager.rabbitMessageQueue.get(1)+"\n\t"+TransactionManager.rabbitMessageQueue.get(2));
+				date = new Date();
+			}
+		}	
 	}
 }
