@@ -11,11 +11,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.File;
 import java.net.URISyntaxException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Properties;
-
+import java.util.LinkedList;
 import net.pixelcop.sewer.sink.durable.TransactionManager;
 
 import org.eclipse.jetty.util.log.Log;

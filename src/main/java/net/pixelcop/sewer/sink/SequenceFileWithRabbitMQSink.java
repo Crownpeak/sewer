@@ -6,7 +6,7 @@ import net.pixelcop.sewer.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import net.pixelcop.sewer.sink.durable.TransactionManager;
-
+import java.util.LinkedList;
 import com.evidon.nerf.AccessLogWritable;
 
 /**
@@ -36,6 +36,10 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   public void append(Event event) throws IOException {
     super.append(event);
     TransactionManager.rabbitMessageQueue.push(event.toString() + TransactionManager.rabbitMessageDelimeter + ((AccessLogWritable)event).getHost() );
+    LOG.info("RABBITMQ: size of LinkedList<String> : "+TransactionManager.rabbitMessageQueue.size() );
+    if( TransactionManager.rabbitMessageQueue.peek() != null)
+    	LOG.info("RABBITMQ: size of LinkedList<String> is GREATER THAN 0" );
+
 //   	TransactionManager.sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
   }
 
