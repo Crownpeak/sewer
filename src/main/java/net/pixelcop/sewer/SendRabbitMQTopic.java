@@ -193,7 +193,13 @@ public class SendRabbitMQTopic extends Thread {
 	@Override
 	public void run() {
 		while( true ) {
-			if( TransactionManager.rabbitMessageQueue.size() > 0 ) {
+		    LOG.info("RABBITMQ: IN SEND RABBIT: size of LinkedList<String> : "+TransactionManager.rabbitMessageQueue.size() );
+			if( TransactionManager.rabbitMessageQueue.peek() != null )
+			    LOG.info("RABBITMQ: IN SEND RABBIT: Peek is not null : ");
+			else
+			    LOG.info("RABBITMQ: IN SEND RABBIT: Peek = null : ");
+
+		    if( TransactionManager.rabbitMessageQueue.size() > 0 ) {
 	        	LOG.info("RABBITMQ: SIZE OF QUEUE : "+TransactionManager.rabbitMessageQueue.size() );
 	        	
 				String fullMessage = TransactionManager.rabbitMessageQueue.get(0);
