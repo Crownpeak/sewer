@@ -46,7 +46,11 @@ public class TransactionManager extends Thread {
   public static final int IDLE = 1;
   public static final int DRAINING = 2;
   
-  public static final BlockingQueue<String> rabbitMessageQueue = new LinkedBlockingQueue<String>();
+  public static final ArrayList<String> rabbitMessageQueue1 = new ArrayList<String>();
+  public static final ArrayList<String> rabbitMessageQueue2 = new ArrayList<String>();
+  public static boolean rabbitMessageSwitch = true;
+
+
   public static final String rabbitMessageDelimeter = ":::";
   public static final SendRabbitMQTopic sendRabbit = new SendRabbitMQTopic();
 

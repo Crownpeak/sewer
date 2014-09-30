@@ -47,6 +47,7 @@ public class SendRabbitMQTopic extends Thread {
     private String QUEUE_CONFIRM_NAME;
     
     private int RETRIES;
+    private int THRESHOLD;
 
     private boolean CONFIRMS=false;
 
@@ -66,6 +67,7 @@ public class SendRabbitMQTopic extends Thread {
         QUEUE_CONFIRM_NAME = prop.getProperty("rmq.queue.confirm.name");
         
         RETRIES = Integer.parseInt(prop.getProperty("rmq.send.retries"));
+        THRESHOLD = Integer.parseInt(prop.getProperty("rmq.threshold"));
 
         CONFIRMS = Boolean.parseBoolean( prop.getProperty("rmq.queue.is.confirm") );
 
@@ -190,47 +192,69 @@ public class SendRabbitMQTopic extends Thread {
         }
 	}
 
+	public int getThreshold() {
+		return THRESHOLD;
+	}
+	
 	@Override
 	public void run() {
 		while( true ) {
-		    LOG.info("RABBITMQ: IN SEND RABBIT: size of LinkedList<String> : "+TransactionManager.rabbitMessageQueue.size() );
-			if( TransactionManager.rabbitMessageQueue.peek() != null )
-			    LOG.info("RABBITMQ: IN SEND RABBIT: Peek is not null : ");
-			else
-			    LOG.info("RABBITMQ: IN SEND RABBIT: Peek = null : ");
-
-		    if( TransactionManager.rabbitMessageQueue.size() > 0 ) {
-	        	LOG.info("RABBITMQ: SIZE OF QUEUE : "+TransactionManager.rabbitMessageQueue.size() );
-	        	
-				String fullMessage = TransactionManager.rabbitMessageQueue.peek();
-				String message = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[0];
-				String host = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[1];
-				
-				int ack = -1;
-//				for( int i = 0; i < RETRIES && !ack; i++) {
-				open();
-				ack = sendMessage(message , host);
-//				}
-				if(ack == 0)
-                	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
-				else if(ack == 1) {
-					try {
-						TransactionManager.rabbitMessageQueue.take();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+			if( !TransactionManager.rabbitMessageSwitch ) {
+				if( TransactionManager.rabbitMessageQueue1.size() > 0) {
+					String fullMessage = TransactionManager.rabbitMessageQueue1.get(0);
+					String message = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[0];
+					String host = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[1];
+					
+					int ack = -1;
+					open();
+					ack = sendMessage(message , host);
+					if(ack == 0)
+	                	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
+					else if(ack == 1)
+							TransactionManager.rabbitMessageQueue1.remove(0);
+					else if( ack == 2)
+						LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
+					else {
+						LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
+						TransactionManager.rabbitMessageQueue1.remove(0);
 					}
 				}
-				else if( ack == 2)
-					LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
-				else {
-					LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
-					try {
-						TransactionManager.rabbitMessageQueue.take();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+				
+				if( TransactionManager.rabbitMessageQueue1.size() == 0 && TransactionManager.rabbitMessageQueue2.size() >= THRESHOLD ) {
+					LOG.info("RABBITMQ: CRITERIA MET SWITCHING TO REMOVING FROM QUEUE 2");
+					TransactionManager.rabbitMessageSwitch=true;
 				}
 			}
+			else {
+				if( TransactionManager.rabbitMessageQueue2.size() > 0) {
+					String fullMessage = TransactionManager.rabbitMessageQueue2.get(0);
+					String message = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[0];
+					String host = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[1];
+					
+					int ack = -1;
+					open();
+					ack = sendMessage(message , host);
+					if(ack == 0)
+	                	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
+					else if(ack == 1)
+							TransactionManager.rabbitMessageQueue2.remove(0);
+					else if( ack == 2)
+						LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
+					else {
+						LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
+						TransactionManager.rabbitMessageQueue2.remove(0);
+					}
+				}
+				
+				if( TransactionManager.rabbitMessageQueue2.size() == 0 && TransactionManager.rabbitMessageQueue1.size() >= THRESHOLD ) {
+					LOG.info("RABBITMQ: CRITERIA MET SWITCHING TO REMOVING FROM QUEUE 1");
+					TransactionManager.rabbitMessageSwitch=false;
+				}
+				
+			}
+//		    if( TransactionManager.rabbitMessageQueue.size() > 0 ) {	        	
+//				
+//			}
 		}	
 	}
 }
