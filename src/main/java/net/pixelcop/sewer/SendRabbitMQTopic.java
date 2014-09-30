@@ -198,7 +198,9 @@ public class SendRabbitMQTopic extends Thread {
 		// TODO Auto-generated method stub
 //		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 //		Date date = new Date();
+    	LOG.info("RABBITMQ: STARTING RABBIT THREAD\n\n\n" );
 		while( true ) {
+        	LOG.info("RABBITMQ: SIZE OF QUEUE : "+TransactionManager.rabbitMessageQueue.size() );
 			if( TransactionManager.rabbitMessageQueue.size() > 0 ) {
 				String fullMessage = TransactionManager.rabbitMessageQueue.get(0);
 				String message = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[0];
