@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -44,7 +45,7 @@ public class TransactionManager extends Thread {
   public static final int IDLE = 1;
   public static final int DRAINING = 2;
   
-  public static final ArrayList<String> rabbitMessageQueue = new ArrayList<String>();
+  public static final LinkedList<String> rabbitMessageQueue = new LinkedList<String>();
   public static final String rabbitMessageDelimeter = ":::";
   public static final SendRabbitMQTopic sendRabbit = new SendRabbitMQTopic();
 

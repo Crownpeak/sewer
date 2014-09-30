@@ -212,12 +212,12 @@ public class SendRabbitMQTopic extends Thread {
 				if(ack == 0)
                 	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
 				else if(ack == 1)
-					TransactionManager.rabbitMessageQueue.remove(0);
+					TransactionManager.rabbitMessageQueue.pop();
 				else if( ack == 2)
 					LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
 				else {
 					LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
-					TransactionManager.rabbitMessageQueue.remove(0);
+					TransactionManager.rabbitMessageQueue.pop();
 				}
 			}
 //			Date dateNow = new Date();
