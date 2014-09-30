@@ -35,6 +35,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   @Override
   public void append(Event event) throws IOException {
     super.append(event);
+    LOG.info("\n\n\n\n\n::: SENDING EVENT TO TRANSACTIONMANAGER.RABBITSENDMESSAGEQUEUE :::\n\n\n\n\n");
     TransactionManager.rabbitMessageQueue.push(event.toString() + TransactionManager.rabbitMessageDelimeter + ((AccessLogWritable)event).getHost() );
 //   	TransactionManager.sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
   }
