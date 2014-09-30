@@ -196,8 +196,8 @@ public class SendRabbitMQTopic extends Thread {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		Date date = new Date();
+//		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+//		Date date = new Date();
 		while( true ) {
 			if( TransactionManager.rabbitMessageQueue.size() > 0 ) {
 				String fullMessage = TransactionManager.rabbitMessageQueue.get(0);
@@ -220,12 +220,12 @@ public class SendRabbitMQTopic extends Thread {
 					TransactionManager.rabbitMessageQueue.remove(0);
 				}
 			}
-			Date dateNow = new Date();
-			if((dateNow.getTime()-date.getTime())/1000 >= 15 ) {
-				if(TransactionManager.rabbitMessageQueue.size() >= 3 )
-					LOG.info("QueueSize: "+TransactionManager.rabbitMessageQueue.size() +"\n\t" + TransactionManager.rabbitMessageQueue.get(0) + "\n\t" + TransactionManager.rabbitMessageQueue.get(1)+"\n\t"+TransactionManager.rabbitMessageQueue.get(2));
-				date = new Date();
-			}
+//			Date dateNow = new Date();
+//			if((dateNow.getTime()-date.getTime())/1000 >= 15 ) {
+//				if(TransactionManager.rabbitMessageQueue.size() >= 3 )
+//					LOG.info("QueueSize: "+TransactionManager.rabbitMessageQueue.size() +"\n\t" + TransactionManager.rabbitMessageQueue.get(0) + "\n\t" + TransactionManager.rabbitMessageQueue.get(1)+"\n\t"+TransactionManager.rabbitMessageQueue.get(2));
+//				date = new Date();
+//			}
 		}	
 	}
 }
