@@ -81,13 +81,16 @@ public class SendRabbitMQTopic extends Thread {
         factory.setVirtualHost(VIRTUAL_HOST);
     }
 
-    public boolean sendMessage(String message, String host) {    	
+    public int sendMessage(String message, String host) {    	
         if( host.equals(ROUTING_KEY)) {
             try{    
                 channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
                 if( CONFIRMS) {
                     boolean test = channel.waitForConfirms();
-                    return test;
+                    if( test)
+                    	return 1;
+                    else
+                    	return 0;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -96,12 +99,14 @@ public class SendRabbitMQTopic extends Thread {
                  e.printStackTrace();
                  LOG.warn("RABBITMQ: InterruptException in send message.\n"+e.getMessage());
             }
+            return 2;
         }
         else {
             if( LOG.isDebugEnabled() )
                 LOG.debug("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
+            return -1;
         }
-        return false;
+        
     }
     
     public void open() {
@@ -199,16 +204,21 @@ public class SendRabbitMQTopic extends Thread {
 				String message = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[0];
 				String host = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[1];
 				
-				boolean ack = false;
+				int ack = -1;
 //				for( int i = 0; i < RETRIES && !ack; i++) {
 				open();
 				ack = sendMessage(message , host);
 //				}
-				if(ack)
-					TransactionManager.rabbitMessageQueue.remove(0);
-				else
+				if(ack == 0)
                 	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
-				
+				else if(ack == 1)
+					TransactionManager.rabbitMessageQueue.remove(0);
+				else if( ack == 2)
+					LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
+				else {
+					LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
+					TransactionManager.rabbitMessageQueue.remove(0);
+				}
 			}
 			Date dateNow = new Date();
 			if((dateNow.getTime()-date.getTime())/1000 >= 15 ) {
