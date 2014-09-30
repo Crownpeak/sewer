@@ -211,12 +211,12 @@ public class SendRabbitMQTopic extends Thread {
 					if(ack == 0)
 	                	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
 					else if(ack == 1)
-							TransactionManager.rabbitMessageQueue1.remove(0);
+							TransactionManager.rabbitMessageQueue1.pop();
 					else if( ack == 2)
 						LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
 					else {
 						LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
-						TransactionManager.rabbitMessageQueue1.remove(0);
+						TransactionManager.rabbitMessageQueue1.pop();
 					}
 				}
 				
@@ -237,12 +237,12 @@ public class SendRabbitMQTopic extends Thread {
 					if(ack == 0)
 	                	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
 					else if(ack == 1)
-							TransactionManager.rabbitMessageQueue2.remove(0);
+							TransactionManager.rabbitMessageQueue2.pop();
 					else if( ack == 2)
 						LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
 					else {
 						LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
-						TransactionManager.rabbitMessageQueue2.remove(0);
+						TransactionManager.rabbitMessageQueue2.pop();
 					}
 				}
 				
