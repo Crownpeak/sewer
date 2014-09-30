@@ -202,7 +202,7 @@ public class SendRabbitMQTopic extends Thread {
 		    if( TransactionManager.rabbitMessageQueue.size() > 0 ) {
 	        	LOG.info("RABBITMQ: SIZE OF QUEUE : "+TransactionManager.rabbitMessageQueue.size() );
 	        	
-				String fullMessage = TransactionManager.rabbitMessageQueue.get(0);
+				String fullMessage = TransactionManager.rabbitMessageQueue.peek();
 				String message = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[0];
 				String host = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[1];
 				
@@ -213,13 +213,22 @@ public class SendRabbitMQTopic extends Thread {
 //				}
 				if(ack == 0)
                 	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
-				else if(ack == 1)
-					TransactionManager.rabbitMessageQueue.pop();
+				else if(ack == 1) {
+					try {
+						TransactionManager.rabbitMessageQueue.take();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
 				else if( ack == 2)
 					LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
 				else {
 					LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
-					TransactionManager.rabbitMessageQueue.pop();
+					try {
+						TransactionManager.rabbitMessageQueue.take();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}	

@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,7 +46,7 @@ public class TransactionManager extends Thread {
   public static final int IDLE = 1;
   public static final int DRAINING = 2;
   
-  public static final LinkedList<String> rabbitMessageQueue = new LinkedList<String>();
+  public static final BlockingQueue<String> rabbitMessageQueue = new LinkedBlockingQueue<String>();
   public static final String rabbitMessageDelimeter = ":::";
   public static final SendRabbitMQTopic sendRabbit = new SendRabbitMQTopic();
 

@@ -35,8 +35,12 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   @Override
   public void append(Event event) throws IOException {
     super.append(event);
-    TransactionManager.rabbitMessageQueue.push(event.toString() + TransactionManager.rabbitMessageDelimeter + ((AccessLogWritable)event).getHost() );
-    LOG.info("\n\n\n\n\n\nRABBITMQ: size of LinkedList<String> : "+TransactionManager.rabbitMessageQueue.size()+"\n\n\n\n\n\n\n" );
+    try {
+		TransactionManager.rabbitMessageQueue.put(event.toString() + TransactionManager.rabbitMessageDelimeter + ((AccessLogWritable)event).getHost() );
+	} catch (InterruptedException e) {
+		e.printStackTrace();
+	}
+//    LOG.info("\n\n\n\n\n\nRABBITMQ: size of LinkedList<String> : "+TransactionManager.rabbitMessageQueue.size()+"\n\n\n\n\n\n\n" );
 
 //   	TransactionManager.sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
   }
