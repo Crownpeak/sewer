@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.pixelcop.sewer.SendRabbitMQTopic;
+import net.pixelcop.sewer.sink.durable.TransactionManager;
+
 import com.evidon.nerf.AccessLogWritable;
 
 /**
@@ -41,7 +43,9 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   @Override
   public void append(Event event) throws IOException {
     super.append(event);
-   	sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
+    TransactionManager.testArray.add(event.toString()+TransactionManager.testDelimeter+((AccessLogWritable)event).getHost());
+    sendRabbit.sendMessage();
+    //   	sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
     
 //    boolean added = false;
 //    for( MessageBatch mb : rabbitMessages ) {

@@ -95,6 +95,46 @@ public class SendRabbitMQTopic {
                 LOG.debug("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
         }
     }
+    int count = 2;
+    public void sendMessage() {
+    	
+    	for( int i = 0; i < count; i++) {
+	    	if( TransactionManager.testArray.size() == 0 )
+	    		break;
+	    	String message = TransactionManager.testArray.get(0).split(TransactionManager.testDelimeter)[0];
+	    	String host = TransactionManager.testArray.get(0).split(TransactionManager.testDelimeter)[1];
+	    	
+	        if( host.equals(ROUTING_KEY)) {
+	            try{    
+	            	TransactionManager.testArray.add(message+TransactionManager.testDelimeter+host);
+	            	TransactionManager.testArray.remove(0);
+	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+	                if( CONFIRMS) {
+	                    boolean test = channel.waitForConfirms();
+	                    if( test ) {
+	    	                LOG.debug("RABBITMQ: Sent Successfully, removing from queue:");
+	    		            TransactionManager.testArray.remove(0);
+	                    }
+	                    else {
+	    	                LOG.debug("RABBITMQ: Was NACKED, Try resending, leave in queue.");
+	                    }
+	                    	
+	//                    LOG.info("RABBITMQ: Message ACKED? : "+test+"\n\t"+message);
+	                }
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            }  catch( InterruptedException e ) {
+	                 e.printStackTrace();
+	            }
+                LOG.debug("RABBITMQ: ConnectionError, Try resending, leave in queue.");
+	        }
+	        else {
+//	            if( LOG.isDebugEnabled() )
+                LOG.debug("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
+	            TransactionManager.testArray.remove(0);
+	        }	
+    	}
+    }
     
     public void open() {
         try {
