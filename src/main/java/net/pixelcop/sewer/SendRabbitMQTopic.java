@@ -97,10 +97,14 @@ public class SendRabbitMQTopic {
     }
     int count = 2;
     public void sendMessage() {
-    	LOG.warn("\n\t:::SENDING MESSAGES:::\n");
+    	LOG.warn("\n\n\t:::SENDING MESSAGES:::\n");
     	for( int i = 0; i < count; i++) {
+    		LOG.info("RABBITMQ: Count: " + count);
 	    	if( TransactionManager.testArray.size() == 0 )
+	    	{
+	    		LOG.info("RABBITMQ: Queue Size is 0: BREAK OUT");
 	    		break;
+	    	}
 	    	String message = TransactionManager.testArray.get(0).split(TransactionManager.testDelimeter)[0];
 	    	String host = TransactionManager.testArray.get(0).split(TransactionManager.testDelimeter)[1];
 	    	
@@ -123,10 +127,11 @@ public class SendRabbitMQTopic {
 	                }
 	            } catch (IOException e) {
 	                e.printStackTrace();
+	                LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
 	            }  catch( InterruptedException e ) {
 	                 e.printStackTrace();
+	                 LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
 	            }
-                LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
 	        }
 	        else {
 //	            if( LOG.isDebugEnabled() )
