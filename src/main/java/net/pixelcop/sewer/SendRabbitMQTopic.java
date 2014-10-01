@@ -74,37 +74,30 @@ public class SendRabbitMQTopic {
         factory.setVirtualHost(VIRTUAL_HOST);
     }
 
-    public void sendMessage(String message, String host) {    	
-        if( host.equals(ROUTING_KEY)) {
-            try{    
-            	TransactionManager.testArray.add(message+TransactionManager.testDelimeter+host);
-            	TransactionManager.testArray.remove(0);
-                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
-                if( CONFIRMS) {
-                    boolean test = channel.waitForConfirms();
-//                    LOG.info("RABBITMQ: Message ACKED? : "+test+"\n\t"+message);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }  catch( InterruptedException e ) {
-                 e.printStackTrace();
-            }
-        }
-        else {
-            if( LOG.isDebugEnabled() )
-                LOG.debug("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
-        }
-    }
-    int count = 2;
+//    public void sendMessage(String message, String host) {    	
+//        if( host.equals(ROUTING_KEY)) {
+//            try{    
+//            	TransactionManager.testArray.add(message+TransactionManager.testDelimeter+host);
+//            	TransactionManager.testArray.remove(0);
+//                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+//                if( CONFIRMS) {
+//                    boolean test = channel.waitForConfirms();
+////                    LOG.info("RABBITMQ: Message ACKED? : "+test+"\n\t"+message);
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }  catch( InterruptedException e ) {
+//                 e.printStackTrace();
+//            }
+//        }
+//        else {
+//            if( LOG.isDebugEnabled() )
+//                LOG.debug("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
+//        }
+//    }
+
     public void sendMessage() {
-    	LOG.warn("\n\n\t:::SENDING MESSAGES:::\n");
-    	for( int i = 0; i < count; i++) {
-    		LOG.info("RABBITMQ: Count: " + i);
-	    	if( TransactionManager.testArray.size() == 0 )
-	    	{
-	    		LOG.info("RABBITMQ: Queue Size is 0: BREAK OUT");
-	    		break;
-	    	}
+    	if( TransactionManager.testArray.size() > 0 ) {	
 	    	String message = TransactionManager.testArray.get(0).split(TransactionManager.testDelimeter)[0];
 	    	String host = TransactionManager.testArray.get(0).split(TransactionManager.testDelimeter)[1];
 	    	
@@ -121,9 +114,7 @@ public class SendRabbitMQTopic {
 	                    }
 	                    else {
 	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
-	                    }
-	                    	
-	//                    LOG.info("RABBITMQ: Message ACKED? : "+test+"\n\t"+message);
+	                    }	                    	
 	                }
 	            } catch (IOException e) {
 	                e.printStackTrace();
