@@ -96,6 +96,7 @@ public class SendRabbitMQTopic extends Thread {
                     else
                     	return 0;
                 }
+                return 1;
             } catch (IOException e) {
                 e.printStackTrace();
                 LOG.warn("RABBITMQ: IOException in send message.\n"+e.getMessage());
