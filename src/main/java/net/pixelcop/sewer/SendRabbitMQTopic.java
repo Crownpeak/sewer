@@ -98,8 +98,8 @@ public class SendRabbitMQTopic {
 
     public void sendMessage() {
     	if( TransactionManager.testArray.size() > 0 ) {	
-	    	String message = TransactionManager.testArray.get(0).split(TransactionManager.testDelimeter)[0];
-	    	String host = TransactionManager.testArray.get(0).split(TransactionManager.testDelimeter)[1];
+	    	String message = TransactionManager.testArray.peek().split(TransactionManager.testDelimeter)[0];
+	    	String host = TransactionManager.testArray.peek().split(TransactionManager.testDelimeter)[1];
 	    	
 	        if( host.equals(ROUTING_KEY)) {
 	            try{
@@ -109,7 +109,7 @@ public class SendRabbitMQTopic {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
 	    	                LOG.info("RABBITMQ: Sent Successfully, removing from queue:");
-	    		            TransactionManager.testArray.remove(0);
+	    		            TransactionManager.testArray.take();
 	                    }
 	                    else {
 	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
@@ -126,7 +126,11 @@ public class SendRabbitMQTopic {
 	        else {
 //	            if( LOG.isDebugEnabled() )
                 LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
-	            TransactionManager.testArray.remove(0);
+	            try {
+					TransactionManager.testArray.take();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 	        }	
     	}
     }

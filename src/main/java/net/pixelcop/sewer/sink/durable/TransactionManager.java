@@ -43,7 +43,7 @@ public class TransactionManager extends Thread {
   public static final int IDLE = 1;
   public static final int DRAINING = 2;
   
-  public static final ArrayList<String> testArray = new ArrayList<String>();
+  public static final LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
   public static final String testDelimeter = ":::";
 
 
