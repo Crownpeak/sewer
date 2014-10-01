@@ -102,9 +102,8 @@ public class SendRabbitMQTopic {
 	    	String host = TransactionManager.testArray.get(0).split(TransactionManager.testDelimeter)[1];
 	    	
 	        if( host.equals(ROUTING_KEY)) {
-	            try{    
-	            	TransactionManager.testArray.add(message+TransactionManager.testDelimeter+host);
-	            	TransactionManager.testArray.remove(0);
+	            try{
+	                LOG.info("RABBITMQ: Sending Message: " + message);
 	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
