@@ -11,8 +11,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.File;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import net.pixelcop.sewer.sink.durable.TransactionManager;
 
 import org.eclipse.jetty.util.log.Log;
@@ -50,6 +53,8 @@ public class SendRabbitMQTopic extends Thread {
     private int THRESHOLD;
 
     private boolean CONFIRMS=false;
+    
+    private LinkedBlockingQueue<ArrayList<String>> queueList = new LinkedBlockingQueue<ArrayList<String>>();
 
     public SendRabbitMQTopic() {        
     	loadProperties();
@@ -196,65 +201,113 @@ public class SendRabbitMQTopic extends Thread {
 		return THRESHOLD;
 	}
 	
+	public void addQueue(ArrayList<String> q ) {
+//		for( int i =0; i < 3; i++ ) {
+			try {
+				queueList.put(q);
+//				break;
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+//		}
+	}
+	
 	@Override
 	public void run() {
 		while( true ) {
-			if( !TransactionManager.rabbitMessageSwitch ) {
-				if( TransactionManager.rabbitMessageQueue1.size() > 0) {
-					String fullMessage = TransactionManager.rabbitMessageQueue1.get(0);
-					String message = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[0];
-					String host = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[1];
+			if( queueList.size() > 0 ) {
+				ArrayList<String> queue = queueList.peek();
+//				for( String s : queue ) {
+				while( queue.size() > 0 ) {
+					String s = queue.get(0);
+					String message = s.split(TransactionManager.rabbitMessageDelimeter)[0];
+					String host = s.split(TransactionManager.rabbitMessageDelimeter)[1];
 					
 					int ack = -1;
 					open();
 					ack = sendMessage(message , host);
 					if(ack == 0)
-	                	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
+		            	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
 					else if(ack == 1)
-							TransactionManager.rabbitMessageQueue1.pop();
+						queue.remove(0);
 					else if( ack == 2)
 						LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
 					else {
 						LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
-						TransactionManager.rabbitMessageQueue1.pop();
+						queue.remove(0);
 					}
 				}
-				
-				if( TransactionManager.rabbitMessageQueue1.size() == 0 && TransactionManager.rabbitMessageQueue2.size() >= THRESHOLD ) {
-					LOG.info("RABBITMQ: CRITERIA MET SWITCHING TO REMOVING FROM QUEUE 2");
-					TransactionManager.rabbitMessageSwitch=true;
+				try {
+					queueList.take();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
 			else {
-				if( TransactionManager.rabbitMessageQueue2.size() > 0) {
-					String fullMessage = TransactionManager.rabbitMessageQueue2.get(0);
-					String message = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[0];
-					String host = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[1];
-					
-					int ack = -1;
-					open();
-					ack = sendMessage(message , host);
-					if(ack == 0)
-	                	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
-					else if(ack == 1)
-							TransactionManager.rabbitMessageQueue2.pop();
-					else if( ack == 2)
-						LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
-					else {
-						LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
-						TransactionManager.rabbitMessageQueue2.pop();
-					}
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-				
-				if( TransactionManager.rabbitMessageQueue2.size() == 0 && TransactionManager.rabbitMessageQueue1.size() >= THRESHOLD ) {
-					LOG.info("RABBITMQ: CRITERIA MET SWITCHING TO REMOVING FROM QUEUE 1");
-					TransactionManager.rabbitMessageSwitch=false;
-				}
-				
 			}
-//		    if( TransactionManager.rabbitMessageQueue.size() > 0 ) {	        	
-//				
-//			}
+			
 		}	
 	}
+	
+//	if( !TransactionManager.rabbitMessageSwitch ) {
+//		if( TransactionManager.rabbitMessageQueue1.size() > 0) {
+//			String fullMessage = TransactionManager.rabbitMessageQueue1.get(0);
+//			String message = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[0];
+//			String host = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[1];
+//			
+//			int ack = -1;
+//			open();
+//			ack = sendMessage(message , host);
+//			if(ack == 0)
+//            	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
+//			else if(ack == 1)
+//					TransactionManager.rabbitMessageQueue1.pop();
+//			else if( ack == 2)
+//				LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
+//			else {
+//				LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
+//				TransactionManager.rabbitMessageQueue1.pop();
+//			}
+//		}
+//		
+//		if( TransactionManager.rabbitMessageQueue1.size() == 0 && TransactionManager.rabbitMessageQueue2.size() >= THRESHOLD ) {
+//			LOG.info("RABBITMQ: CRITERIA MET SWITCHING TO REMOVING FROM QUEUE 2");
+//			TransactionManager.rabbitMessageSwitch=true;
+//		}
+//	}
+//	else {
+//		if( TransactionManager.rabbitMessageQueue2.size() > 0) {
+//			String fullMessage = TransactionManager.rabbitMessageQueue2.get(0);
+//			String message = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[0];
+//			String host = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[1];
+//			
+//			int ack = -1;
+//			open();
+//			ack = sendMessage(message , host);
+//			if(ack == 0)
+//            	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
+//			else if(ack == 1)
+//					TransactionManager.rabbitMessageQueue2.pop();
+//			else if( ack == 2)
+//				LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
+//			else {
+//				LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
+//				TransactionManager.rabbitMessageQueue2.pop();
+//			}
+//		}
+//		
+//		if( TransactionManager.rabbitMessageQueue2.size() == 0 && TransactionManager.rabbitMessageQueue1.size() >= THRESHOLD ) {
+//			LOG.info("RABBITMQ: CRITERIA MET SWITCHING TO REMOVING FROM QUEUE 1");
+//			TransactionManager.rabbitMessageSwitch=false;
+//		}
+//		
+//	}
+////    if( TransactionManager.rabbitMessageQueue.size() > 0 ) {	        	
+////		
+////	}
 }

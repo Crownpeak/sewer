@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import net.pixelcop.sewer.Event;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -46,10 +47,7 @@ public class TransactionManager extends Thread {
   public static final int IDLE = 1;
   public static final int DRAINING = 2;
   
-  public static final LinkedList<String> rabbitMessageQueue1 = new LinkedList<String>();
-  public static final LinkedList<String> rabbitMessageQueue2 = new LinkedList<String>();
-  public static boolean rabbitMessageSwitch = true;
-
+  public static final LinkedList<Event> rabbitMessageQueue = new LinkedList<Event>();
 
   public static final String rabbitMessageDelimeter = ":::";
   public static final SendRabbitMQTopic sendRabbit = new SendRabbitMQTopic();
