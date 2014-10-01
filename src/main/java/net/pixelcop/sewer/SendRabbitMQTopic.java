@@ -99,7 +99,7 @@ public class SendRabbitMQTopic {
     public void sendMessage() {
     	LOG.warn("\n\n\t:::SENDING MESSAGES:::\n");
     	for( int i = 0; i < count; i++) {
-    		LOG.info("RABBITMQ: Count: " + count);
+    		LOG.info("RABBITMQ: Count: " + i);
 	    	if( TransactionManager.testArray.size() == 0 )
 	    	{
 	    		LOG.info("RABBITMQ: Queue Size is 0: BREAK OUT");
