@@ -112,11 +112,11 @@ public class SendRabbitMQTopic {
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
-	    	                LOG.debug("RABBITMQ: Sent Successfully, removing from queue:");
+	    	                LOG.info("RABBITMQ: Sent Successfully, removing from queue:");
 	    		            TransactionManager.testArray.remove(0);
 	                    }
 	                    else {
-	    	                LOG.debug("RABBITMQ: Was NACKED, Try resending, leave in queue.");
+	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
 	                    }
 	                    	
 	//                    LOG.info("RABBITMQ: Message ACKED? : "+test+"\n\t"+message);
@@ -126,11 +126,11 @@ public class SendRabbitMQTopic {
 	            }  catch( InterruptedException e ) {
 	                 e.printStackTrace();
 	            }
-                LOG.debug("RABBITMQ: ConnectionError, Try resending, leave in queue.");
+                LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
 	        }
 	        else {
 //	            if( LOG.isDebugEnabled() )
-                LOG.debug("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
+                LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
 	            TransactionManager.testArray.remove(0);
 	        }	
     	}
