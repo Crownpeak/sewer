@@ -13,6 +13,8 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Properties;
 
+import net.pixelcop.sewer.sink.durable.TransactionManager;
+
 import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +77,8 @@ public class SendRabbitMQTopic {
     public void sendMessage(String message, String host) {    	
         if( host.equals(ROUTING_KEY)) {
             try{    
+            	TransactionManager.testArray.add(message+TransactionManager.testDelimeter+host);
+            	TransactionManager.testArray.remove(0);
                 channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
                 if( CONFIRMS) {
                     boolean test = channel.waitForConfirms();
