@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Properties;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import net.pixelcop.sewer.sink.durable.TransactionManager;
 
@@ -47,6 +48,11 @@ public class SendRabbitMQTopic {
     private String QUEUE_CONFIRM_NAME;
 
     private boolean CONFIRMS=false;
+    
+    public LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
+    public final String testDelimeter = ":::";
+
+
 
     public SendRabbitMQTopic() {        
     	loadProperties();
@@ -95,11 +101,13 @@ public class SendRabbitMQTopic {
 //                LOG.debug("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
 //        }
 //    }
-
-    public void sendMessage() {
-    	if( TransactionManager.testArray.size() > 0 ) {	
-	    	String message = TransactionManager.testArray.peek().split(TransactionManager.testDelimeter)[0];
-	    	String host = TransactionManager.testArray.peek().split(TransactionManager.testDelimeter)[1];
+    
+    public void sendMessage(String m, String h) {
+    	
+    	put(m+testDelimeter+h);
+    	if( testArray.size() > 0 ) {	
+	    	String message = testArray.peek().split(testDelimeter)[0];
+	    	String host = testArray.peek().split(testDelimeter)[1];
 	    	
 	        if( host.equals(ROUTING_KEY)) {
 	            try{
@@ -109,7 +117,48 @@ public class SendRabbitMQTopic {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
 	    	                LOG.info("RABBITMQ: Sent Successfully, removing from queue:");
-	    		            TransactionManager.testArray.take();
+	    		            testArray.take();
+	                    }
+	                    else {
+	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
+	                    }	                    	
+	                }
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	                LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
+	                open();
+	            }  catch( InterruptedException e ) {
+	                 e.printStackTrace();
+	                 LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
+	                 open();
+	            }
+	        }
+	        else {
+//	            if( LOG.isDebugEnabled() )
+                LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
+	            try {
+					testArray.take();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+	        }	
+    	}
+    }
+
+    public void sendMessage() {
+    	if( testArray.size() > 0 ) {	
+	    	String message = testArray.peek().split(testDelimeter)[0];
+	    	String host = testArray.peek().split(testDelimeter)[1];
+	    	
+	        if( host.equals(ROUTING_KEY)) {
+	            try{
+	                LOG.info("RABBITMQ: Sending Message: " + message);
+	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+	                if( CONFIRMS) {
+	                    boolean test = channel.waitForConfirms();
+	                    if( test ) {
+	    	                LOG.info("RABBITMQ: Sent Successfully, removing from queue:");
+	    		            testArray.take();
 	                    }
 	                    else {
 	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
@@ -127,12 +176,20 @@ public class SendRabbitMQTopic {
 //	            if( LOG.isDebugEnabled() )
                 LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
 	            try {
-					TransactionManager.testArray.take();
+					testArray.take();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 	        }	
     	}
+    }
+    
+    public void put(String s) {
+    	try {
+			testArray.put(s);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
     }
     
     public void open() {

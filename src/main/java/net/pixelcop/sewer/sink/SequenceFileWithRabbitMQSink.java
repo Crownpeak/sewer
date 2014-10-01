@@ -20,39 +20,38 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 
   private static final Logger LOG = LoggerFactory.getLogger(SequenceFileWithRabbitMQSink.class);
 
-  SendRabbitMQTopic sendRabbit;
+//  SendRabbitMQTopic sendRabbit;
 //  ArrayList<MessageBatch> rabbitMessages = new ArrayList<MessageBatch>();
 
   public SequenceFileWithRabbitMQSink(String[] args) {
 	super(args);
-    sendRabbit = new SendRabbitMQTopic();
+//    sendRabbit = new SendRabbitMQTopic();
   }
 
   @Override
   public void close() throws IOException {
-	  sendRabbit.close();
+//	  sendRabbit.close();
 	  super.close();
   }
 
   @Override
   public void open() throws IOException {
     super.open();
-    sendRabbit.open();
+    TransactionManager.sendRabbit.open();
   }
   
   @Override
   public void append(Event event) throws IOException {
     super.append(event);
-    try {
-		TransactionManager.testArray.put(event.toString()+TransactionManager.testDelimeter+((AccessLogWritable)event).getHost());
-	} catch (InterruptedException e) {
-		e.printStackTrace();
-	}
-    LOG.warn("\t:::SENDING MESSAGE: "+event.toString() );
-    for( int i = 0; i < 2; i++ )
-    	sendRabbit.sendMessage();
+	
+//    TransactionManager.sendRabbit.put(event.toString()+TransactionManager.testDelimeter+((AccessLogWritable)event).getHost());
 
-    //   	sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
+    LOG.warn("\t:::APPENDING: "+event.toString() );
+//    for( int i = 0; i < 1; i++ )
+//    	TransactionManager.sendRabbit.sendMessage();
+    
+    for( int i = 0; i < 1; i++ )
+       	TransactionManager.sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
     
 //    boolean added = false;
 //    for( MessageBatch mb : rabbitMessages ) {
