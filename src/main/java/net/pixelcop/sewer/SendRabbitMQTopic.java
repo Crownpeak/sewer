@@ -97,7 +97,7 @@ public class SendRabbitMQTopic {
     }
     int count = 2;
     public void sendMessage() {
-    	
+    	LOG.warn("\n\t:::SENDING MESSAGES:::\n");
     	for( int i = 0; i < count; i++) {
 	    	if( TransactionManager.testArray.size() == 0 )
 	    		break;
