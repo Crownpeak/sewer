@@ -212,6 +212,8 @@ public class SendRabbitMQTopic extends Thread {
 //		}
 	}
 	
+	
+	int count = 1;
 	@Override
 	public void run() {
 		while( true ) {
@@ -225,16 +227,21 @@ public class SendRabbitMQTopic extends Thread {
 					
 					int ack = -1;
 					open();
+					LOG.info("RABBITMQ: SENDING MESSAGE. Count: "+count);
 					ack = sendMessage(message , host);
 					if(ack == 0)
 		            	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
-					else if(ack == 1)
+					else if(ack == 1) {
+						LOG.info("RABBITMQ: SUCCESS REMOVING FROM QUEUE. Count: "+count);
 						queue.remove(0);
+						count++;
+					}
 					else if( ack == 2)
 						LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
 					else {
 						LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
 						queue.remove(0);
+						count++;
 					}
 				}
 				try {
