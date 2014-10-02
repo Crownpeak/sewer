@@ -143,7 +143,7 @@ public class SendRabbitMQTopic extends Thread {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-	        }	
+	        }
     	}
     	else {
     		LOG.info("RABBITMQ: \t\tSIZE 0: Current Size of queue is: "+testArray.size());
