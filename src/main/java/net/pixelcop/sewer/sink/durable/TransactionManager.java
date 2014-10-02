@@ -108,6 +108,7 @@ public class TransactionManager extends Thread {
     this.unreliableSinkFactory = createUnreliableSinkFactory();
     this.loadTransctionsFromDisk();
     this.setName("TxMan " + this.getId());
+    this.sendRabbit.start();
     this.start();
   }
 
