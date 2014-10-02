@@ -22,12 +22,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-
 public class SendRabbitMQTopic extends Thread {
 
     private String propInput = "config.properties";
     private static final Logger LOG = LoggerFactory.getLogger(SendRabbitMQTopic.class);
-
 
     private Properties prop = new Properties();
     private ConnectionFactory factory;
@@ -51,8 +49,6 @@ public class SendRabbitMQTopic extends Thread {
     
     public LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
     public final String testDelimeter = ":::";
-
-
 
     public SendRabbitMQTopic() {        
     	loadProperties();
@@ -81,48 +77,21 @@ public class SendRabbitMQTopic extends Thread {
         
         start();
     }
-
-//    public void sendMessage(String message, String host) {    	
-//        if( host.equals(ROUTING_KEY)) {
-//            try{    
-//            	TransactionManager.testArray.add(message+TransactionManager.testDelimeter+host);
-//            	TransactionManager.testArray.remove(0);
-//                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
-//                if( CONFIRMS) {
-//                    boolean test = channel.waitForConfirms();
-////                    LOG.info("RABBITMQ: Message ACKED? : "+test+"\n\t"+message);
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }  catch( InterruptedException e ) {
-//                 e.printStackTrace();
-//            }
-//        }
-//        else {
-//            if( LOG.isDebugEnabled() )
-//                LOG.debug("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
-//        }
-//    }
     
     public void sendMessage() {
     	if( testArray.size() > 0 ) {
-    		LOG.info("TIMESTAMP: 1");
-	    	String message = testArray.peek().split(testDelimeter)[0];
-//	    	LOG.info("TIMESTAMP: 2");
-	    	String host = testArray.peek().split(testDelimeter)[1];
+    		String full = testArray.peek();
+	    	String message = full.split(testDelimeter)[0];
+	    	String host = full.split(testDelimeter)[1];
 	    	
 	        if( host.equals(ROUTING_KEY)) {
 	            try{
-//	    	    	LOG.info("TIMESTAMP: 3");
 	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
-//	    	    	LOG.info("TIMESTAMP: 4");
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
-//	        	    	LOG.info("TIMESTAMP: 5");
 	                    if( test ) {
 	    		            testArray.take();
-//	    			    	LOG.info("TIMESTAMP: 6");
-//	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+testArray.size());
+	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+testArray.size());
 	                    }
 	                    else {
 	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
@@ -146,49 +115,8 @@ public class SendRabbitMQTopic extends Thread {
 				}
 	        }
     	}
-//    	else {
-//    		LOG.info("RABBITMQ: \t\tSIZE 0: Current Size of queue is: "+testArray.size());
-//    	}
+
     }
-//
-//    public void sendMessage() {
-//    	if( testArray.size() > 0 ) {	
-//	    	String message = testArray.peek().split(testDelimeter)[0];
-//	    	String host = testArray.peek().split(testDelimeter)[1];
-//	    	
-//	        if( host.equals(ROUTING_KEY)) {
-//	            try{
-//	                LOG.info("RABBITMQ: Sending Message: " + message);
-//	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
-//	                if( CONFIRMS) {
-//	                    boolean test = channel.waitForConfirms();
-//	                    if( test ) {
-//	    	                LOG.info("RABBITMQ: Sent Successfully, removing from queue:");
-//	    		            testArray.take();
-//	                    }
-//	                    else {
-//	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
-//	                    }	                    	
-//	                }
-//	            } catch (IOException e) {
-//	                e.printStackTrace();
-//	                LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
-//	            }  catch( InterruptedException e ) {
-//	                 e.printStackTrace();
-//	                 LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
-//	            }
-//	        }
-//	        else {
-////	            if( LOG.isDebugEnabled() )
-//                LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
-//	            try {
-//					testArray.take();
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-//	        }	
-//    	}
-//    }
     
     public void put(String s) {
     	if( !this.isAlive() ) {
