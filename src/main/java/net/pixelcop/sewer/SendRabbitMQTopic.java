@@ -49,7 +49,7 @@ public class SendRabbitMQTopic extends Thread {
 
     private boolean CONFIRMS=false;
     
-    public static final LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
+    public LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
     public final String testDelimeter = ":::";
 
 
