@@ -192,7 +192,10 @@ public class SendRabbitMQTopic extends Thread {
     public void put(String s) {
     	if( !this.isAlive() ) {
     		LOG.warn("RABBITMQ: Rabbit Thread dead, restarting...");
-    		this.start();	
+    		close();
+    		loadProperties();
+    		open();
+    		this.start();
     	}
     	try {
 			testArray.put(s);
