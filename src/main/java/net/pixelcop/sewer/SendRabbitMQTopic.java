@@ -145,9 +145,9 @@ public class SendRabbitMQTopic extends Thread {
 				}
 	        }
     	}
-    	else {
-    		LOG.info("RABBITMQ: \t\tSIZE 0: Current Size of queue is: "+testArray.size());
-    	}
+//    	else {
+//    		LOG.info("RABBITMQ: \t\tSIZE 0: Current Size of queue is: "+testArray.size());
+//    	}
     }
 //
 //    public void sendMessage() {
