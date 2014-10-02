@@ -212,6 +212,7 @@ public class SendRabbitMQTopic extends Thread {
             channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
 
             //test code for easy switching between confirms queue and normal queue
+            LOG.info("RABBITMQ: IN OPEN: Confirms = "+CONFIRMS );
             if(CONFIRMS)
                 createQueueConfirm();
             else
