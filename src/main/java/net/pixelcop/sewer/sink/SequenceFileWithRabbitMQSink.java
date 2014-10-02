@@ -45,8 +45,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 	
 //    TransactionManager.sendRabbit.put(event.toString()+TransactionManager.testDelimeter+((AccessLogWritable)event).getHost());
 	if( !TransactionManager.sendRabbit.isAlive() ) {
-		LOG.warn("RABBITMQ: Rabbit Thread dead, restarting...");
-		TransactionManager.sendRabbit.start();
+		TransactionManager.restartRabbit();
 	}
     TransactionManager.sendRabbit.put(event.toString()+TransactionManager.sendRabbit.testDelimeter+((AccessLogWritable)event).getHost());
 //    for( int i = 0; i < 1; i++ )
