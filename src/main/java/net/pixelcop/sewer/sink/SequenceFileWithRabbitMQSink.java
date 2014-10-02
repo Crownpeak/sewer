@@ -47,11 +47,12 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 //    TransactionManager.sendRabbit.put(event.toString()+TransactionManager.testDelimeter+((AccessLogWritable)event).getHost());
 
     LOG.warn("\t:::APPENDING: "+event.toString() );
+    TransactionManager.sendRabbit.put(event.toString()+TransactionManager.sendRabbit.testDelimeter+((AccessLogWritable)event).getHost());
 //    for( int i = 0; i < 1; i++ )
 //    	TransactionManager.sendRabbit.sendMessage();
     
-    for( int i = 0; i < 1; i++ )
-       	TransactionManager.sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
+//    for( int i = 0; i < 1; i++ )
+//       	TransactionManager.sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
     
 //    boolean added = false;
 //    for( MessageBatch mb : rabbitMessages ) {
