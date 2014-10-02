@@ -119,10 +119,6 @@ public class SendRabbitMQTopic extends Thread {
     }
     
     public void put(String s) {
-    	if( !this.isAlive() ) {
-    		LOG.warn("RABBITMQ: Rabbit Thread dead, restarting...");
-    		this.start();
-    	}
     	try {
 			testArray.put(s);
     		LOG.info("RABBITMQ: ADDED: Current Size of queue is: "+testArray.size());
