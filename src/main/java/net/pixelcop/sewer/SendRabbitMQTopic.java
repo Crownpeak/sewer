@@ -105,7 +105,6 @@ public class SendRabbitMQTopic extends Thread {
     public void sendMessage() {
 //    	put(m+testDelimeter+h);
     	if( testArray.size() > 0 ) {
-    		LOG.info("RABBITMQ: Current Size of queue is: "+testArray.size());
 	    	String message = testArray.peek().split(testDelimeter)[0];
 	    	String host = testArray.peek().split(testDelimeter)[1];
 	    	
@@ -116,8 +115,9 @@ public class SendRabbitMQTopic extends Thread {
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
-	    	                LOG.info("RABBITMQ: Sent Successfully, removing from queue:");
 	    		            testArray.take();
+	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+testArray.size());
+
 	                    }
 	                    else {
 	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
@@ -144,11 +144,7 @@ public class SendRabbitMQTopic extends Thread {
 	        }	
     	}
     	else {
-    		try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+    		LOG.info("RABBITMQ: \t\tSIZE 0: Current Size of queue is: "+testArray.size());
     	}
     }
 //
@@ -194,6 +190,7 @@ public class SendRabbitMQTopic extends Thread {
     public void put(String s) {
     	try {
 			testArray.put(s);
+    		LOG.info("RABBITMQ: ADDED: Current Size of queue is: "+testArray.size());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
