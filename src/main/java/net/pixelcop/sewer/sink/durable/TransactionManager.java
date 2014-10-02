@@ -48,6 +48,8 @@ public class TransactionManager extends Thread {
 //  public static final String testDelimeter = ":::";
   
   public static SendRabbitMQTopic sendRabbit = new SendRabbitMQTopic();
+  public static SendRabbitMQTopic sendRabbit2 = new SendRabbitMQTopic();
+
 
 
   /**
