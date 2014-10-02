@@ -105,21 +105,24 @@ public class SendRabbitMQTopic extends Thread {
 //    }
     
     public void sendMessage() {
-//    	put(m+testDelimeter+h);
     	if( testArray.size() > 0 ) {
+    		LOG.info("TIMESTAMP: 1");
 	    	String message = testArray.peek().split(testDelimeter)[0];
+	    	LOG.info("TIMESTAMP: 2");
 	    	String host = testArray.peek().split(testDelimeter)[1];
 	    	
 	        if( host.equals(ROUTING_KEY)) {
 	            try{
-//	                LOG.info("RABBITMQ: Sending Message: " + message);
+	    	    	LOG.info("TIMESTAMP: 3");
 	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+	    	    	LOG.info("TIMESTAMP: 4");
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
+	        	    	LOG.info("TIMESTAMP: 5");
 	                    if( test ) {
 	    		            testArray.take();
+	    			    	LOG.info("TIMESTAMP: 6");
 	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+testArray.size());
-
 	                    }
 	                    else {
 	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
