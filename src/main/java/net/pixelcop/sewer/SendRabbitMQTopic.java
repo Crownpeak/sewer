@@ -75,9 +75,12 @@ public class SendRabbitMQTopic {
     public void sendMessage(String message, String host) {    	
         if( host.equals(ROUTING_KEY)) {
             try{    
+            	LOG.info("TIMESTAMP: Sending Message");
                 channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
                 if( CONFIRMS) {
+                    LOG.info("TIMESTAMP: WAITING FOR CONFIRMS");
                     boolean test = channel.waitForConfirms();
+                    LOG.info("TIMESTAMP: Done Sending Message. Exit");
 //                    LOG.info("RABBITMQ: Message ACKED? : "+test+"\n\t"+message);
                 }
             } catch (IOException e) {
