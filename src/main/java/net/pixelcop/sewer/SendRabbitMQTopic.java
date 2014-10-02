@@ -78,6 +78,8 @@ public class SendRabbitMQTopic extends Thread {
         factory.setUsername(USERNAME);
         factory.setPassword(PASSWORD);
         factory.setVirtualHost(VIRTUAL_HOST);
+        
+        start();
     }
 
 //    public void sendMessage(String message, String host) {    	
