@@ -37,7 +37,6 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   @Override
   public void open() throws IOException {
     super.open();
-    TransactionManager.sendRabbit.open();
   }
   
   @Override

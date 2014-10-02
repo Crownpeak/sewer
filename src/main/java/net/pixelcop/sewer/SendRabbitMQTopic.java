@@ -128,11 +128,9 @@ public class SendRabbitMQTopic extends Thread {
 	            } catch (IOException e) {
 	                e.printStackTrace();
 	                LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
-	                open();
 	            }  catch( InterruptedException e ) {
 	                 e.printStackTrace();
 	                 LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
-	                 open();
 	            }
 	        }
 	        else {
@@ -192,7 +190,6 @@ public class SendRabbitMQTopic extends Thread {
     public void put(String s) {
     	if( !this.isAlive() ) {
     		LOG.warn("RABBITMQ: Rabbit Thread dead, restarting...");
-    		open();
     		this.start();
     	}
     	try {
@@ -272,6 +269,7 @@ public class SendRabbitMQTopic extends Thread {
 	}
 	
 	public void run() {
+	    TransactionManager.sendRabbit.open();
 		while(true) {
 			sendMessage();
 		}
