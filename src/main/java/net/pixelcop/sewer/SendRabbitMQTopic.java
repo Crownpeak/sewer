@@ -112,7 +112,7 @@ public class SendRabbitMQTopic extends Thread {
 	    	
 	        if( host.equals(ROUTING_KEY)) {
 	            try{
-	                LOG.info("RABBITMQ: Sending Message: " + message);
+//	                LOG.info("RABBITMQ: Sending Message: " + message);
 	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
