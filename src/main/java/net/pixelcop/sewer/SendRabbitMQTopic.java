@@ -11,12 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Properties;
-import java.util.LinkedList;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import net.pixelcop.sewer.sink.durable.TransactionManager;
 
 import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
@@ -25,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 
-public class SendRabbitMQTopic extends Thread {
+public class SendRabbitMQTopic {
 
     private String propInput = "config.properties";
     private static final Logger LOG = LoggerFactory.getLogger(SendRabbitMQTopic.class);
@@ -48,13 +43,8 @@ public class SendRabbitMQTopic extends Thread {
 
     private String QUEUE_NAME;
     private String QUEUE_CONFIRM_NAME;
-    
-    private int RETRIES;
-    private int THRESHOLD;
 
     private boolean CONFIRMS=false;
-    
-    private LinkedBlockingQueue<ArrayList<String>> queueList = new LinkedBlockingQueue<ArrayList<String>>();
 
     public SendRabbitMQTopic() {        
     	loadProperties();
@@ -70,9 +60,6 @@ public class SendRabbitMQTopic extends Thread {
 
         QUEUE_NAME = prop.getProperty("rmq.queue.name");
         QUEUE_CONFIRM_NAME = prop.getProperty("rmq.queue.confirm.name");
-        
-        RETRIES = Integer.parseInt(prop.getProperty("rmq.send.retries"));
-        THRESHOLD = Integer.parseInt(prop.getProperty("rmq.threshold"));
 
         CONFIRMS = Boolean.parseBoolean( prop.getProperty("rmq.queue.is.confirm") );
 
@@ -85,56 +72,31 @@ public class SendRabbitMQTopic extends Thread {
         factory.setVirtualHost(VIRTUAL_HOST);
     }
 
-    public int sendMessage(String message, String host) {    	
+    public void sendMessage(String message, String host) {    	
         if( host.equals(ROUTING_KEY)) {
             try{    
                 channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
                 if( CONFIRMS) {
                     boolean test = channel.waitForConfirms();
-                    if( test)
-                    	return 1;
-                    else
-                    	return 0;
+//                    LOG.info("RABBITMQ: Message ACKED? : "+test+"\n\t"+message);
                 }
-                return 1;
             } catch (IOException e) {
                 e.printStackTrace();
-                LOG.warn("RABBITMQ: IOException in send message.\n"+e.getMessage());
             }  catch( InterruptedException e ) {
                  e.printStackTrace();
-                 LOG.warn("RABBITMQ: InterruptException in send message.\n"+e.getMessage());
             }
-            return 2;
         }
         else {
             if( LOG.isDebugEnabled() )
                 LOG.debug("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
-            return -1;
         }
-        
     }
     
     public void open() {
         try {
-        	if( connection == null) {
-        		LOG.info("RABBITMQ: Connection is null, creating new connection.");
-        		connection = factory.newConnection();
-        	}
-        	else if( !connection.isOpen() ) {
-        		LOG.info("RABBITMQ: Connection isn't open, creating new connection.");
-        		connection = factory.newConnection();
-        	}
-        	
-        	if( channel == null) {
-        		LOG.info("RABBITMQ: Channel is null, creating new connection.");
-        		channel = connection.createChannel();
-                channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
-        	}
-        	else if( !channel.isOpen() ) {
-        		LOG.info("RABBITMQ: Channel isn't open, creating new connection.");
-        		channel = connection.createChannel();
-                channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
-        	}       
+    		connection = factory.newConnection();
+            channel = connection.createChannel();
+            channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
 
             //test code for easy switching between confirms queue and normal queue
             if(CONFIRMS)
@@ -197,125 +159,4 @@ public class SendRabbitMQTopic extends Thread {
             e.printStackTrace();
         }
 	}
-
-	public int getThreshold() {
-		return THRESHOLD;
-	}
-	
-	public void addQueue(ArrayList<String> q ) {
-//		for( int i =0; i < 3; i++ ) {
-			try {
-				queueList.put(q);
-//				break;
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-//		}
-	}
-	
-	
-	int count = 1;
-	@Override
-	public void run() {
-		while( true ) {
-			if( queueList.size() > 0 ) {
-				ArrayList<String> queue = queueList.peek();
-//				for( String s : queue ) {
-				while( queue.size() > 0 ) {
-					String s = queue.get(0);
-					String message = s.split(TransactionManager.rabbitMessageDelimeter)[0];
-					String host = s.split(TransactionManager.rabbitMessageDelimeter)[1];
-					
-					int ack = -1;
-					open();
-					LOG.info("RABBITMQ: SENDING MESSAGE. Count: "+count);
-					ack = sendMessage(message , host);
-					if(ack == 0)
-		            	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
-					else if(ack == 1) {
-						LOG.info("RABBITMQ: SUCCESS REMOVING FROM QUEUE. Count: "+count);
-						queue.remove(0);
-						count++;
-					}
-					else if( ack == 2)
-						LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
-					else {
-						LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
-						queue.remove(0);
-						count++;
-					}
-				}
-				try {
-					queueList.take();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			else {
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			
-		}	
-	}
-	
-//	if( !TransactionManager.rabbitMessageSwitch ) {
-//		if( TransactionManager.rabbitMessageQueue1.size() > 0) {
-//			String fullMessage = TransactionManager.rabbitMessageQueue1.get(0);
-//			String message = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[0];
-//			String host = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[1];
-//			
-//			int ack = -1;
-//			open();
-//			ack = sendMessage(message , host);
-//			if(ack == 0)
-//            	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
-//			else if(ack == 1)
-//					TransactionManager.rabbitMessageQueue1.pop();
-//			else if( ack == 2)
-//				LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
-//			else {
-//				LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
-//				TransactionManager.rabbitMessageQueue1.pop();
-//			}
-//		}
-//		
-//		if( TransactionManager.rabbitMessageQueue1.size() == 0 && TransactionManager.rabbitMessageQueue2.size() >= THRESHOLD ) {
-//			LOG.info("RABBITMQ: CRITERIA MET SWITCHING TO REMOVING FROM QUEUE 2");
-//			TransactionManager.rabbitMessageSwitch=true;
-//		}
-//	}
-//	else {
-//		if( TransactionManager.rabbitMessageQueue2.size() > 0) {
-//			String fullMessage = TransactionManager.rabbitMessageQueue2.get(0);
-//			String message = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[0];
-//			String host = fullMessage.split(TransactionManager.rabbitMessageDelimeter)[1];
-//			
-//			int ack = -1;
-//			open();
-//			ack = sendMessage(message , host);
-//			if(ack == 0)
-//            	LOG.info("RABBITMQ: Message NACKED : "+ack+"\t"+message);
-//			else if(ack == 1)
-//					TransactionManager.rabbitMessageQueue2.pop();
-//			else if( ack == 2)
-//				LOG.info("RABBITMQ: Connection Issue when sending Messsage : "+ack+"\t"+message);
-//			else {
-//				LOG.info("RABBITMQ: Host does not match Routing Key...Ignoring: "+ack+"\t"+message);
-//				TransactionManager.rabbitMessageQueue2.pop();
-//			}
-//		}
-//		
-//		if( TransactionManager.rabbitMessageQueue2.size() == 0 && TransactionManager.rabbitMessageQueue1.size() >= THRESHOLD ) {
-//			LOG.info("RABBITMQ: CRITERIA MET SWITCHING TO REMOVING FROM QUEUE 1");
-//			TransactionManager.rabbitMessageSwitch=false;
-//		}
-//		
-//	}
-////    if( TransactionManager.rabbitMessageQueue.size() > 0 ) {	        	
-////		
-////	}
 }
