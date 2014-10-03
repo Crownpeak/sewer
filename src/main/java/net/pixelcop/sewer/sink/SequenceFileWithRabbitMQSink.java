@@ -37,7 +37,6 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 		  LOG.info("RABBITMQ: Putting batch of host: "+batch.getHost());
 		  TransactionManager.sendRabbit.putBatch(batch);
 	  }
-	  LOG.info("\n\n:::RABBITMQ RESULT BLOCK Running Total:::\n\tTotal Append Calls: "+TransactionManager.appends+"\n\tSuccess Append Calls: "+TransactionManager.appendsSuccess+"\n\tFailed Append Calls: "+TransactionManager.appendsFail+"\n::: :::\n");
 	  super.close();
   }
   
@@ -50,34 +49,24 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   @Override
   public void append(Event event) throws IOException {
     super.append(event);
-	TransactionManager.appends++;
     //adding to Rabbit message,adds to the RabbitMessageBatch object that has the same host, if no matches creates one with that host and adds.
     boolean done = false;
     LOG.info("TRACKER: STARTING...\n\n");
-    LOG.info("TRACKER: Trying Appending Message: "+count);
+    LOG.info("TRACKER: Trying Appending Message: "+count + " HOST: "+((AccessLogWritable)event).getHost());
     for(RabbitMessageBatch rmb : batches) {
 //    	done = rmb.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
-    	done = rmb.checkHostAndAddMessage(""+count, ((AccessLogWritable)event).getHost());
+    	done = rmb.checkHostAndAddMessage(""+count+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
     	if(done)
     		break;
     }
     if(!done) {
     	RabbitMessageBatch newBatch = TransactionManager.sendRabbit.new RabbitMessageBatch(((AccessLogWritable)event).getHost());
 //    	done = newBatch.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
-    	done = newBatch.checkHostAndAddMessage(""+count, ((AccessLogWritable)event).getHost());
+    	done = newBatch.checkHostAndAddMessage(""+count+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
     	batches.add(newBatch);
 //    	LOG.info("RABBITMQ: Created batch and added message to host: "+newBatch.getHost());
     }
-    if(!done) {
-        LOG.info("TRACKER: Appending Failed: "+count);
-    	TransactionManager.appendsFail++;
-//    	LOG.warn("RABBITMQ: Could not add message of host: "+((AccessLogWritable)event).getHost()+"\n\n");
-    }
-    else {
-        LOG.info("TRACKER: Appending Success: "+count);
-    	TransactionManager.appendsSuccess++;
-    }
-    LOG.info("\n\nTRACKER: ENDING...\n");
+    LOG.info("TRACKER: END.\n\n");
 
     count++;
     

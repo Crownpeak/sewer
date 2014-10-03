@@ -92,25 +92,25 @@ public class SendRabbitMQTopic extends Thread {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
 	    		            batchQueue.take();
-	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+batchQueue.size());
-	    		    		LOG.info("RABBITMQ:\n\t# of Messages in batch: "+rmb.getCount()+"\n\n");
+//	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+batchQueue.size());
+//	    		    		LOG.info("RABBITMQ:\n\t# of Messages in batch: "+rmb.getCount()+"\n\n");
 	                    }
 	                    else {
-	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
+//	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
 	                    }	                    	
 	                }
 	            } catch (IOException e) {
 	                e.printStackTrace();
-	                LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
+//	                LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
 	            }  catch( InterruptedException e ) {
 	                 e.printStackTrace();
-	                 LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
+//	                 LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
 	            }
 	        }
 	        else {
 //	            if( LOG.isDebugEnabled() )
-                LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message. Current Size of queue is: "+batchQueue.size());
-	    		LOG.info("RABBITMQ:\n\t# of Messages in INVAID batch: -"+rmb.getCount()+"\n\n");
+//                LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message. Current Size of queue is: "+batchQueue.size());
+//	    		LOG.info("RABBITMQ:\n\t# of Messages in INVAID batch: -"+rmb.getCount()+"\n\n");
 
 	            try {
 					batchQueue.take();
@@ -125,7 +125,7 @@ public class SendRabbitMQTopic extends Thread {
     public void putBatch(RabbitMessageBatch rmb) {
     	try {
 			batchQueue.put(rmb);
-    		LOG.info("RABBITMQ: ADDED: Current Size of queue is: "+batchQueue.size());
+//    		LOG.info("RABBITMQ: ADDED: Current Size of queue is: "+batchQueue.size());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
