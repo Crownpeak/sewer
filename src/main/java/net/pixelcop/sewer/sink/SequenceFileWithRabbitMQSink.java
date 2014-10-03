@@ -32,11 +32,12 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 	  //sends each batch (different hosts) to SendRabbit
 	  if( !TransactionManager.sendRabbit.isAlive() )
 		  TransactionManager.restartRabbit();
-	  
+	  LOG.info("RABBITMQ: ::::::::::::::::::::THE END IS NEAR: ");
 	  for(RabbitMessageBatch batch : batches ) {
 		  LOG.info("RABBITMQ: ::::::::::::::::::::::::::Putting batch of host: "+batch.getHost());
 		  TransactionManager.sendRabbit.putBatch(batch);
 	  }
+	  LOG.info("RABBITMQ: ::::::::::::::::::::THE END IS HERE: ");
 	  super.close();
   }
   
@@ -68,6 +69,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 //    	LOG.info("RABBITMQ: Created batch and added message to host: "+newBatch.getHost());
     }
 //    LOG.info("TRACKER: END.\n\n");
+    LOG.info("RABBITMQ: Count: "+count);
     count++;
     //using if( done==true )  same number of calls as Patricks program is sending
   }
