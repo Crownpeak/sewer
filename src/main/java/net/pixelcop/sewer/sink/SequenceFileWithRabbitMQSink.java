@@ -37,10 +37,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 		  LOG.info("RABBITMQ: Putting batch of host: "+batch.getHost());
 		  TransactionManager.sendRabbit.putBatch(batch);
 	  }
-	  LOG.info("\n\nRABBITMQ RESULT BLOCK:::\n\tTotal Append Calls: "+TransactionManager.appends+"\n\tSuccess Append Calls: "+TransactionManager.appendsSuccess+"\n\tFailed Append Calls: "+TransactionManager.appendsFail+"\n::: :::\n");
-	  TransactionManager.appends=0;
-	  TransactionManager.appendsSuccess=0;
-	  TransactionManager.appendsFail=0;
+	  LOG.info("\n\n:::RABBITMQ RESULT BLOCK Running Total:::\n\tTotal Append Calls: "+TransactionManager.appends+"\n\tSuccess Append Calls: "+TransactionManager.appendsSuccess+"\n\tFailed Append Calls: "+TransactionManager.appendsFail+"\n::: :::\n");
 	  super.close();
   }
   
