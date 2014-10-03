@@ -87,13 +87,13 @@ public class SendRabbitMQTopic extends Thread {
 	    	
 	        if( rmb.getHost().equals(ROUTING_KEY)) {
 	            try{
-	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, rmb.getBatchedMessage().getBytes());
+	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, rmb.getBatch().getBytes());
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
 	    		            batchQueue.take();
 	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+batchQueue.size());
-	    		    		LOG.info("RABBITMQ:\n\t# of Messages in batch: "+rmb.getBatch().size()+"\n\n");
+	    		    		LOG.info("RABBITMQ:\n\t# of Messages in batch: "+rmb.getCount()+"\n\n");
 	                    }
 	                    else {
 	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
@@ -110,7 +110,7 @@ public class SendRabbitMQTopic extends Thread {
 	        else {
 //	            if( LOG.isDebugEnabled() )
                 LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message. Current Size of queue is: "+batchQueue.size());
-	    		LOG.info("RABBITMQ:\n\t# of Messages in INVAID batch: -"+rmb.getBatch().size()+"\n\n");
+	    		LOG.info("RABBITMQ:\n\t# of Messages in INVAID batch: -"+rmb.getCount()+"\n\n");
 
 	            try {
 					batchQueue.take();
@@ -208,8 +208,9 @@ public class SendRabbitMQTopic extends Thread {
 	
 	public class RabbitMessageBatch {
 		
-		ArrayList<String> batch=new ArrayList<String>();
+		String batch=null;
 		String host="";
+		int count=0;
 				
 		public RabbitMessageBatch(String host) {
 			this.host = host;
@@ -217,35 +218,27 @@ public class SendRabbitMQTopic extends Thread {
 		
 		public boolean checkHostAndAddMessage(String message, String host) {
 			if(this.host.equals(host)) {
-//				if(this.batch==null) 
-//					this.batch=message;
-//				else
-//					this.batch+="\n"+message;
-				
-				this.batch.add(message);
+				if(this.batch==null) 
+					this.batch=message;
+				else
+					this.batch+="\n"+message;	
+				count++;
 				return true;
 			}
 			else
 				return false;
 		}
 		
-		public String getBatchedMessage() {
-			String batchedMessage=null;
-			for(String s : this.batch ) {
-				if( batchedMessage==null)
-					batchedMessage=s;
-				else
-					batchedMessage+="\n"+s;
-			}
-			return batchedMessage;
+		public String getBatch() {
+			return this.batch;
 		}
 		
 		public String getHost() {
 			return host;
 		}
 		
-		public ArrayList<String> getBatch() {
-			return this.batch;
+		public int getCount() {
+			return count;
 		}
 	}
 	
