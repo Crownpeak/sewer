@@ -37,6 +37,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 		  LOG.info("RABBITMQ: Putting batch of host: "+batch.getHost());
 		  TransactionManager.sendRabbit.putBatch(batch);
 	  }
+	  LOG.info("RABBITMQ RESULT BLOCK:::\n\tTotal Append Calls: "+TransactionManager.appends+"\n\tSuccess Append Calls: "+TransactionManager.appendsSuccess+"\n\tFailed Append Calls: "+TransactionManager.appendsFail+"\n::: :::\n");
 	  super.close();
   }
   
@@ -48,7 +49,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   @Override
   public void append(Event event) throws IOException {
     super.append(event);
-	
+	TransactionManager.appends++;
     //adding to Rabbit message,adds to the RabbitMessageBatch object that has the same host, if no matches creates one with that host and adds.
     boolean done = false;
     for(RabbitMessageBatch rmb : batches) {
@@ -62,12 +63,12 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     	batches.add(newBatch);
     	LOG.info("RABBITMQ: Created batch and added message to host: "+newBatch.getHost());
     }
-    
-    
-//	if( !TransactionManager.sendRabbit.isAlive() ) {
-//		TransactionManager.restartRabbit();
-//	}
-//    TransactionManager.sendRabbit.put(event.toString()+TransactionManager.sendRabbit.testDelimeter+((AccessLogWritable)event).getHost());
+    if(!done) {
+    	TransactionManager.appendsFail++;
+    	LOG.warn("RABBITMQ: Could not add message of host: "+((AccessLogWritable)event).getHost()+"\n\n");
+    }
+    else
+    	TransactionManager.appendsSuccess++;
   }
 
 }
