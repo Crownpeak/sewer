@@ -51,10 +51,9 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     super.append(event);
     //adding to Rabbit message,adds to the RabbitMessageBatch object that has the same host, if no matches creates one with that host and adds.
     boolean done = false;
+    
     //APPEND IS BEING CALLED THE SAME NUMBER OF TIMES PATRICK SAYS IT SENT A REQUEST
-
-//    LOG.info("TRACKER: STARTING...");
-//    LOG.info("TRACKER: Trying Appending Message: "+count + " HOST: "+((AccessLogWritable)event).getHost());
+    
     for(RabbitMessageBatch rmb : batches) {
 //    	done = rmb.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
     	done = rmb.checkHostAndAddMessage(""+count+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
@@ -70,11 +69,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     }
 //    LOG.info("TRACKER: END.\n\n");
 
-//    count++;
-    if(done)
-    	LOG.info("Host: "+((AccessLogWritable)event).getHost()+" , Count: "+count++);
-    else
-    	LOG.info("ERROR\n\n\n\n");
+    //using if( done==true )  same number of calls as Patricks program is sending
   }
 
 }

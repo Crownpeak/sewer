@@ -91,7 +91,8 @@ public class SendRabbitMQTopic extends Thread {
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
-	    		            batchQueue.take();
+	    		            RabbitMessageBatch deleteMe = batchQueue.take();
+	    		            LOG.info("\n"+deleteMe.batch);
 //	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+batchQueue.size());
 //	    		    		LOG.info("RABBITMQ:\n\t# of Messages in batch: "+rmb.getCount()+"\n\n");
 	                    }
