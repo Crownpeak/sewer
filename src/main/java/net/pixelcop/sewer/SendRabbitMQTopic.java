@@ -84,17 +84,16 @@ public class SendRabbitMQTopic extends Thread {
     public void sendMessage() {
     	if( batchQueue.size() > 0 ) {
     		RabbitMessageBatch rmb = batchQueue.peek();
-	    	String message = rmb.getBatch();
-	    	String host = rmb.getHost();
 	    	
-	        if( host.equals(ROUTING_KEY)) {
+	        if( rmb.getHost().equals(ROUTING_KEY)) {
 	            try{
-	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, rmb.getBatch().getBytes());
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
 	    		            batchQueue.take();
 	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+batchQueue.size());
+	    		    		LOG.info("RABBITMQ: \t\t# of Messages in bacth: "+rmb.getCount());
 	                    }
 	                    else {
 	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
@@ -110,7 +109,7 @@ public class SendRabbitMQTopic extends Thread {
 	        }
 	        else {
 //	            if( LOG.isDebugEnabled() )
-                LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
+                LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message. Current Size of queue is: "+batchQueue.size());
 	            try {
 					batchQueue.take();
 				} catch (InterruptedException e) {
@@ -120,55 +119,6 @@ public class SendRabbitMQTopic extends Thread {
     	}
 
     }
-    
-//    public void sendMessage() {
-//    	if( testArray.size() > 0 ) {
-//    		String full = testArray.peek();
-//	    	String message = full.split(testDelimeter)[0];
-//	    	String host = full.split(testDelimeter)[1];
-//	    	
-//	        if( host.equals(ROUTING_KEY)) {
-//	            try{
-//	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
-//	                if( CONFIRMS) {
-//	                    boolean test = channel.waitForConfirms();
-//	                    if( test ) {
-//	    		            testArray.take();
-//	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+testArray.size());
-//	                    }
-//	                    else {
-//	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
-//	                    }	                    	
-//	                }
-//	            } catch (IOException e) {
-//	                e.printStackTrace();
-//	                LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
-//	            }  catch( InterruptedException e ) {
-//	                 e.printStackTrace();
-//	                 LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
-//	            }
-//	        }
-//	        else {
-////	            if( LOG.isDebugEnabled() )
-//                LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
-//	            try {
-//					testArray.take();
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-//	        }
-//    	}
-//
-//    }
-    
-//    public void put(String s) {
-//    	try {
-//			testArray.put(s);
-//    		LOG.info("RABBITMQ: ADDED: Current Size of queue is: "+testArray.size());
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//    }
     
     public void putBatch(RabbitMessageBatch rmb) {
     	try {
@@ -256,9 +206,9 @@ public class SendRabbitMQTopic extends Thread {
 	
 	public class RabbitMessageBatch {
 		
-//		ArrayList<String> messages=new ArrayList<String>();
 		String batch=null;
 		String host="";
+		int count=0;
 				
 		public RabbitMessageBatch(String host) {
 			this.host = host;
@@ -266,20 +216,16 @@ public class SendRabbitMQTopic extends Thread {
 		
 		public boolean checkHostAndAddMessage(String message, String host) {
 			if(this.host.equals(host)) {
-//				this.messages.add(message);
 				if(this.batch==null) 
 					this.batch=message;
 				else
 					this.batch+="\n"+message;	
+				count++;
 				return true;
 			}
 			else
 				return false;
 		}
-		
-//		public ArrayList<String> getBatch() {
-//			return messages;
-//		}
 		
 		public String getBatch() {
 			return this.batch;
@@ -289,6 +235,9 @@ public class SendRabbitMQTopic extends Thread {
 			return host;
 		}
 		
+		public int getCount() {
+			return count;
+		}
 	}
 	
 }
