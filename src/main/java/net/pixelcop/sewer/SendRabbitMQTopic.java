@@ -93,7 +93,7 @@ public class SendRabbitMQTopic extends Thread {
 	                    if( test ) {
 	    		            batchQueue.take();
 	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+batchQueue.size());
-	    		    		LOG.info("RABBITMQ: \t\t# of Messages in bacth: "+rmb.getCount());
+	    		    		LOG.info("RABBITMQ:\n\t# of Messages in batch: "+rmb.getCount()+"\n\n");
 	                    }
 	                    else {
 	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
