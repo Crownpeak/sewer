@@ -34,7 +34,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 		  TransactionManager.restartRabbit();
 	  
 	  for(RabbitMessageBatch batch : batches ) {
-		  LOG.info("RABBITMQ: Putting batch of host: "+batch.getHost());
+		  LOG.info("RABBITMQ: ::::::::::::::::::::::::::Putting batch of host: "+batch.getHost());
 		  TransactionManager.sendRabbit.putBatch(batch);
 	  }
 	  super.close();
@@ -68,7 +68,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 //    	LOG.info("RABBITMQ: Created batch and added message to host: "+newBatch.getHost());
     }
 //    LOG.info("TRACKER: END.\n\n");
-
+    count++;
     //using if( done==true )  same number of calls as Patricks program is sending
   }
 
