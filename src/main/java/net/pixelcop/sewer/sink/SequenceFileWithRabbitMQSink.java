@@ -53,11 +53,16 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     boolean done = false;
     for(RabbitMessageBatch rmb : batches) {
     	done = rmb.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
+    	LOG.info("RABBITMQ: Added message to host: "+rmb.getHost());
+    	if(done)
+    		break;
     }
     if(!done) {
     	RabbitMessageBatch newBatch = TransactionManager.sendRabbit.new RabbitMessageBatch(((AccessLogWritable)event).getHost());
     	newBatch.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
+    	LOG.info("RABBITMQ: Created batch and added message to host: "+newBatch.getHost());
     }
+    
     
 //	if( !TransactionManager.sendRabbit.isAlive() ) {
 //		TransactionManager.restartRabbit();

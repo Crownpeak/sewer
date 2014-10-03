@@ -52,7 +52,7 @@ public class SequenceFileSink extends BucketedSink {
       LOG.debug("close() called; currently: " + getStatusString());
       LOG.debug("Closing: " + HdfsUtil.pathToString(dstPath));
     }
-
+    LOG.info("RABBITMQ TEST: \tIS THIS BEING CALLED?");
 //    sendRabbitMessage();
     
     if (writer != null) {
