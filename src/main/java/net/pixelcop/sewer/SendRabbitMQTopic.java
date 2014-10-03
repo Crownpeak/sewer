@@ -110,6 +110,8 @@ public class SendRabbitMQTopic extends Thread {
 	        else {
 //	            if( LOG.isDebugEnabled() )
                 LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message. Current Size of queue is: "+batchQueue.size());
+	    		LOG.info("RABBITMQ:\n\t# of Messages in INVAID batch: -"+rmb.getCount()+"\n\n");
+
 	            try {
 					batchQueue.take();
 				} catch (InterruptedException e) {

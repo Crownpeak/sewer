@@ -50,6 +50,7 @@ public class TransactionManager extends Thread {
   public static SendRabbitMQTopic sendRabbit = new SendRabbitMQTopic();
   public static int appendsSuccess=0;
   public static int appendsFail=0;
+  public static int appendsBadHostl=0;
   public static int appends=0;
 
 
