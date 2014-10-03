@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.File;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -47,8 +48,10 @@ public class SendRabbitMQTopic extends Thread {
 
     private boolean CONFIRMS=false;
     
-    public static LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
-    public final String testDelimeter = ":::";
+//    public static LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
+//    public final String testDelimeter = ":::";
+    
+    public static LinkedBlockingQueue<RabbitMessageBatch> batchQueue = new LinkedBlockingQueue<RabbitMessageBatch>();
 
     public SendRabbitMQTopic() {        
     	loadProperties();
@@ -79,10 +82,10 @@ public class SendRabbitMQTopic extends Thread {
     }
     
     public void sendMessage() {
-    	if( testArray.size() > 0 ) {
-    		String full = testArray.peek();
-	    	String message = full.split(testDelimeter)[0];
-	    	String host = full.split(testDelimeter)[1];
+    	if( batchQueue.size() > 0 ) {
+    		RabbitMessageBatch rmb = batchQueue.peek();
+	    	String message = rmb.getBatch();
+	    	String host = rmb.getHost();
 	    	
 	        if( host.equals(ROUTING_KEY)) {
 	            try{
@@ -90,8 +93,8 @@ public class SendRabbitMQTopic extends Thread {
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
-	    		            testArray.take();
-	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+testArray.size());
+	    		            batchQueue.take();
+	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+batchQueue.size());
 	                    }
 	                    else {
 	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
@@ -109,7 +112,7 @@ public class SendRabbitMQTopic extends Thread {
 //	            if( LOG.isDebugEnabled() )
                 LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
 	            try {
-					testArray.take();
+					batchQueue.take();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -118,10 +121,59 @@ public class SendRabbitMQTopic extends Thread {
 
     }
     
-    public void put(String s) {
+//    public void sendMessage() {
+//    	if( testArray.size() > 0 ) {
+//    		String full = testArray.peek();
+//	    	String message = full.split(testDelimeter)[0];
+//	    	String host = full.split(testDelimeter)[1];
+//	    	
+//	        if( host.equals(ROUTING_KEY)) {
+//	            try{
+//	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+//	                if( CONFIRMS) {
+//	                    boolean test = channel.waitForConfirms();
+//	                    if( test ) {
+//	    		            testArray.take();
+//	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+testArray.size());
+//	                    }
+//	                    else {
+//	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
+//	                    }	                    	
+//	                }
+//	            } catch (IOException e) {
+//	                e.printStackTrace();
+//	                LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
+//	            }  catch( InterruptedException e ) {
+//	                 e.printStackTrace();
+//	                 LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
+//	            }
+//	        }
+//	        else {
+////	            if( LOG.isDebugEnabled() )
+//                LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message:\n\t"+message);
+//	            try {
+//					testArray.take();
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//	        }
+//    	}
+//
+//    }
+    
+//    public void put(String s) {
+//    	try {
+//			testArray.put(s);
+//    		LOG.info("RABBITMQ: ADDED: Current Size of queue is: "+testArray.size());
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//    }
+    
+    public void putBatch(RabbitMessageBatch rmb) {
     	try {
-			testArray.put(s);
-    		LOG.info("RABBITMQ: ADDED: Current Size of queue is: "+testArray.size());
+			batchQueue.put(rmb);
+    		LOG.info("RABBITMQ: ADDED: Current Size of queue is: "+batchQueue.size());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -200,6 +252,43 @@ public class SendRabbitMQTopic extends Thread {
 		while(true) {
 			sendMessage();
 		}
+	}
+	
+	public class RabbitMessageBatch {
+		
+//		ArrayList<String> messages=new ArrayList<String>();
+		String batch=null;
+		String host="";
+				
+		public RabbitMessageBatch(String host) {
+			this.host = host;
+		}
+		
+		public boolean checkHostAndAddMessage(String message, String host) {
+			if(this.host.equals(host)) {
+//				this.messages.add(message);
+				if(this.batch==null) 
+					this.batch=message;
+				else
+					this.batch+="\n"+message;	
+				return true;
+			}
+			else
+				return false;
+		}
+		
+//		public ArrayList<String> getBatch() {
+//			return messages;
+//		}
+		
+		public String getBatch() {
+			return this.batch;
+		}
+		
+		public String getHost() {
+			return host;
+		}
+		
 	}
 	
 }

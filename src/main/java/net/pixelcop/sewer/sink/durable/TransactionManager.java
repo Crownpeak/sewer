@@ -472,9 +472,7 @@ public class TransactionManager extends Thread {
 
   public static void restartRabbit() {
 	  LOG.warn("RABBITMQ: Rabbit Thread dead, restarting...");
-	  LOG.warn("RABBITMQ: \tList Size BEFORE: "+sendRabbit.testArray.size() );
 	  sendRabbit = new SendRabbitMQTopic();
-	  LOG.warn("RABBITMQ: \tList Size AFTER: "+sendRabbit.testArray.size()+"\n\n" );
   }
   
 }
