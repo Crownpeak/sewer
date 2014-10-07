@@ -84,7 +84,7 @@ public class SendRabbitMQTopic extends Thread {
     public void sendMessage() {
     	if( batchQueue.size() > 0 ) {
     		RabbitMessageBatch rmb = batchQueue.peek();
-	    	
+	    	LOG.info("RABBITMQ: PEEKED BATCH SIZE: "+rmb.getCount());
 	        if( rmb.getHost().equals(ROUTING_KEY)) {
 	            try{
 	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, rmb.getBatch().getBytes());
@@ -92,7 +92,7 @@ public class SendRabbitMQTopic extends Thread {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
 	    		            RabbitMessageBatch deleteMe = batchQueue.take();
-	    		            LOG.info("\n"+deleteMe.batch);
+	    		            LOG.info("\n"+deleteMe.getBatch() + " SIZE: "+ deleteMe.getCount() );
 //	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+batchQueue.size());
 //	    		    		LOG.info("RABBITMQ:\n\t# of Messages in batch: "+rmb.getCount()+"\n\n");
 	                    }

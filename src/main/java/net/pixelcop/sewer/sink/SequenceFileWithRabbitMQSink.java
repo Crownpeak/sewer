@@ -32,12 +32,10 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 	  //sends each batch (different hosts) to SendRabbit
 	  if( !TransactionManager.sendRabbit.isAlive() )
 		  TransactionManager.restartRabbit();
-	  LOG.info("RABBITMQ: ::::::::::::::::::::THE END IS NEAR: ");
 	  for(RabbitMessageBatch batch : batches ) {
-		  LOG.info("RABBITMQ: ::::::::::::::::::::::::::Putting batch of host: "+batch.getHost());
+		  LOG.info("RABBITMQ: ::::::::::::::::::::::::::Putting batch of host: "+batch.getHost() + " , SIZE: "+batch.getCount());
 		  TransactionManager.sendRabbit.putBatch(batch);
 	  }
-	  LOG.info("RABBITMQ: ::::::::::::::::::::THE END IS HERE: ");
 	  super.close();
   }
   
