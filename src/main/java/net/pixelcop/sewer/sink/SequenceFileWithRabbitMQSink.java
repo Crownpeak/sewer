@@ -2,6 +2,8 @@ package net.pixelcop.sewer.sink;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.pixelcop.sewer.DrainSink;
@@ -23,7 +25,7 @@ import com.evidon.nerf.AccessLogWritable;
 public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 
   private static final Logger LOG = LoggerFactory.getLogger(SequenceFileWithRabbitMQSink.class);
-  private ArrayList<RabbitMessageBatch> batches = new ArrayList<RabbitMessageBatch>(); 
+  private List<RabbitMessageBatch> batches = new LinkedList<RabbitMessageBatch>(); 
   
   public SequenceFileWithRabbitMQSink(String[] args) {
 	super(args);
