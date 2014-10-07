@@ -63,6 +63,9 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     	batches.add(newBatch);
         LOG.info("RABBITMQ: Created new Batch: " + ((AccessLogWritable)event).getHost() + " , SIZE: "+newBatch.getCount());
     }
+    if(!done) {
+    	LOG.error("RABBITMQ: ERROR: Message not added to any batch!");
+    }
   }
 
 }

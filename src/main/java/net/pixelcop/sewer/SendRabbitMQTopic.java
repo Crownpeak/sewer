@@ -209,9 +209,9 @@ public class SendRabbitMQTopic extends Thread {
 	
 	public class RabbitMessageBatch {
 		
-		String batch=null;
-		String host="";
-		int count=0;
+		private String batch=null;
+		private String host="";
+		private int count=0;
 				
 		public RabbitMessageBatch(String host) {
 			this.host = host;
@@ -221,8 +221,10 @@ public class SendRabbitMQTopic extends Thread {
 			if(this.host.equals(host)) {
 				if(this.batch==null) 
 					this.batch=message;
-				else
-					this.batch+="\n"+message;	
+				else {
+					this.batch+="\n"+message;
+					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\t"+this.batch);
+				}
 				count++;
 				return true;
 			}
