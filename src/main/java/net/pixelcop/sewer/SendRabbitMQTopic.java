@@ -13,6 +13,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.pixelcop.sewer.sink.durable.TransactionManager;
@@ -51,7 +52,7 @@ public class SendRabbitMQTopic extends Thread {
 //    public static LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
 //    public final String testDelimeter = ":::";
     
-    public static LinkedBlockingQueue<RabbitMessageBatch> batchQueue = new LinkedBlockingQueue<RabbitMessageBatch>();
+    public static BlockingQueue<RabbitMessageBatch> batchQueue = new LinkedBlockingQueue<RabbitMessageBatch>();
 
     public SendRabbitMQTopic() {        
     	loadProperties();
@@ -219,11 +220,13 @@ public class SendRabbitMQTopic extends Thread {
 		
 		public boolean checkHostAndAddMessage(String message, String host) {
 			if(this.host.equals(host)) {
-				if(this.batch==null) 
+				if(this.batch==null)  {
 					this.batch=message;
+					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\n"+this.batch);
+				}
 				else {
 					this.batch+="\n"+message;
-					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\t"+this.batch);
+					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\n"+this.batch);
 				}
 				count++;
 				return true;

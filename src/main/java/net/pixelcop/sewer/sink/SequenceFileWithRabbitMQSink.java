@@ -2,6 +2,8 @@ package net.pixelcop.sewer.sink;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import net.pixelcop.sewer.DrainSink;
 import net.pixelcop.sewer.Event;
 import net.pixelcop.sewer.SendRabbitMQTopic.RabbitMessageBatch;
@@ -44,32 +46,27 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 	  super.open();
   }
   
-  private int count = 1;
+  private AtomicInteger atomicCount = new AtomicInteger();
   @Override
   public void append(Event event) throws IOException {
     super.append(event);
     //adding to Rabbit message,adds to the RabbitMessageBatch object that has the same host, if no matches creates one with that host and adds.
     boolean done = false;
-        
+    LOG.info("RABBITMQ: Starting append for, Count: "+atomicCount.addAndGet(1));
     for(RabbitMessageBatch rmb : batches) {
 //    	done = rmb.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
-    	done = rmb.checkHostAndAddMessage(""+count+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
-    	if(done) {
-            LOG.info("RABBITMQ: Count: "+count + " , Added to: " + ((AccessLogWritable)event).getHost() + " , SIZE: "+rmb.getCount());
+    	done = rmb.checkHostAndAddMessage(""+atomicCount.get()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
+    	if(done)
     		break;
-    	}
     }
     if(!done) {
     	RabbitMessageBatch newBatch = TransactionManager.sendRabbit.new RabbitMessageBatch(((AccessLogWritable)event).getHost());
 //    	done = newBatch.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
-    	done = newBatch.checkHostAndAddMessage(""+count+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
+    	done = newBatch.checkHostAndAddMessage(""+atomicCount.get()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
     	batches.add(newBatch);
-        LOG.info("RABBITMQ: Count: "+count + " , Created new Batch: " + ((AccessLogWritable)event).getHost() + " , SIZE: "+newBatch.getCount());
     }
-    count++;
-    if( !done ) {
-    	LOG.error("RABBITMQ: ERROR: Message not added to batch!\t"+count);
-    }
+    if( !done )
+    	LOG.error("RABBITMQ: ERROR: Message not added to batch!\t"+atomicCount.get());
   }
 
 }
