@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.pixelcop.sewer.DrainSink;
@@ -25,7 +27,7 @@ import com.evidon.nerf.AccessLogWritable;
 public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 
   private static final Logger LOG = LoggerFactory.getLogger(SequenceFileWithRabbitMQSink.class);
-  private List<RabbitMessageBatch> batches = new LinkedList<RabbitMessageBatch>(); 
+  private BlockingQueue<RabbitMessageBatch> batches = new LinkedBlockingQueue<RabbitMessageBatch>(); 
   
   public SequenceFileWithRabbitMQSink(String[] args) {
 	super(args);

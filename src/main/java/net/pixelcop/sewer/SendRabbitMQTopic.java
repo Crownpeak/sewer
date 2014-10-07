@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -88,12 +90,12 @@ public class SendRabbitMQTopic extends Thread {
 	    	LOG.info("RABBITMQ: PEEKED BATCH SIZE: "+rmb.getCount());
 	        if( rmb.getHost().equals(ROUTING_KEY)) {
 	            try{
-	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, rmb.getBatch().getBytes());
+	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, rmb.getBatchString().getBytes());
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
 	    		            RabbitMessageBatch deleteMe = batchQueue.take();
-	    		            LOG.info("\n"+deleteMe.getBatch() + " SIZE: "+ deleteMe.getCount() );
+	    		            LOG.info("\n"+deleteMe.getBatchString() + " SIZE: "+ deleteMe.getSize() );
 //	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+batchQueue.size());
 //	    		    		LOG.info("RABBITMQ:\n\t# of Messages in batch: "+rmb.getCount()+"\n\n");
 	                    }
@@ -210,7 +212,8 @@ public class SendRabbitMQTopic extends Thread {
 	
 	public class RabbitMessageBatch {
 		
-		private String batch=null;
+//		private String batch=null;
+		private BlockingQueue<String> batch = new LinkedBlockingQueue<String>();
 		private String host="";
 		private int count=0;
 				
@@ -220,13 +223,19 @@ public class SendRabbitMQTopic extends Thread {
 		
 		public boolean checkHostAndAddMessage(String message, String host) {
 			if(this.host.equals(host)) {
-				if(this.batch==null)  {
-					this.batch=message;
-//					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\n"+this.batch);
-				}
-				else {
-					this.batch+="\n"+message;
-//					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\n"+this.batch);
+//				if(this.batch==null)  {
+//					this.batch=message;
+////					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\n"+this.batch);
+//				}
+//				else {
+//					this.batch+="\n"+message;
+////					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\n"+this.batch);
+//				}
+				try {
+					batch.put(message);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					return false;
 				}
 				count++;
 				return true;
@@ -235,12 +244,27 @@ public class SendRabbitMQTopic extends Thread {
 				return false;
 		}
 		
-		public String getBatch() {
+		public BlockingQueue<String> getBatch() {
 			return this.batch;
+		}
+		
+		public String getBatchString() {
+			String retVal=null;
+			for( String s : this.batch ) {
+				if(retVal==null) 
+					retVal=s;
+				else 
+					retVal+="\n"+s;
+			}
+			return this.batch.toString();
 		}
 		
 		public String getHost() {
 			return host;
+		}
+		
+		public int getSize() {
+			return batch.size();
 		}
 		
 		public int getCount() {
