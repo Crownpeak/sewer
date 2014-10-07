@@ -57,7 +57,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 //    	done = rmb.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
     	done = rmb.checkHostAndAddMessage(""+count+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
     	if(done) {
-            LOG.info("RABBITMQ: Count: "+count + " , Added to: " + ((AccessLogWritable)event).getHost());
+            LOG.info("RABBITMQ: Count: "+count + " , Added to: " + ((AccessLogWritable)event).getHost() + " , SIZE: "+rmb.getCount());
     		break;
     	}
     }
@@ -66,7 +66,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 //    	done = newBatch.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
     	done = newBatch.checkHostAndAddMessage(""+count+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
     	batches.add(newBatch);
-        LOG.info("RABBITMQ: Count: "+count + " , Created new Batch: " + ((AccessLogWritable)event).getHost());
+        LOG.info("RABBITMQ: Count: "+count + " , Created new Batch: " + ((AccessLogWritable)event).getHost() + " , SIZE: "+newBatch.getCount());
     }
     count++;
   }
