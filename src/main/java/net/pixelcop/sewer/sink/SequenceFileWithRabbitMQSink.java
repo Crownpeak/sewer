@@ -52,26 +52,23 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     super.append(event);
     //adding to Rabbit message,adds to the RabbitMessageBatch object that has the same host, if no matches creates one with that host and adds.
     boolean done = false;
-    
-    //APPEND IS BEING CALLED THE SAME NUMBER OF TIMES PATRICK SAYS IT SENT A REQUEST
-    
+        
     for(RabbitMessageBatch rmb : batches) {
 //    	done = rmb.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
     	done = rmb.checkHostAndAddMessage(""+count+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
-    	if(done)
+    	if(done) {
+            LOG.info("RABBITMQ: Count: "+count + " , Added to: " + ((AccessLogWritable)event).getHost());
     		break;
+    	}
     }
     if(!done) {
     	RabbitMessageBatch newBatch = TransactionManager.sendRabbit.new RabbitMessageBatch(((AccessLogWritable)event).getHost());
 //    	done = newBatch.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
     	done = newBatch.checkHostAndAddMessage(""+count+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
     	batches.add(newBatch);
-//    	LOG.info("RABBITMQ: Created batch and added message to host: "+newBatch.getHost());
+        LOG.info("RABBITMQ: Count: "+count + " , Created new Batch: " + ((AccessLogWritable)event).getHost());
     }
-//    LOG.info("TRACKER: END.\n\n");
-    LOG.info("RABBITMQ: Count: "+count);
     count++;
-    //using if( done==true )  same number of calls as Patricks program is sending
   }
 
 }
