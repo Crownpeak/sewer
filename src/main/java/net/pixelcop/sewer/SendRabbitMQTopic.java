@@ -222,11 +222,11 @@ public class SendRabbitMQTopic extends Thread {
 			if(this.host.equals(host)) {
 				if(this.batch==null)  {
 					this.batch=message;
-					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\n"+this.batch);
+//					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\n"+this.batch);
 				}
 				else {
 					this.batch+="\n"+message;
-					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\n"+this.batch);
+//					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\n"+this.batch);
 				}
 				count++;
 				return true;

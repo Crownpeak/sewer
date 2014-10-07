@@ -46,6 +46,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   @Override
   public void open() throws IOException {
 	  super.open();
+	  atomicCount.addAndGet(1);
   }
   
   private AtomicInteger atomicCount = new AtomicInteger();
@@ -54,17 +55,18 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     super.append(event);
     //adding to Rabbit message,adds to the RabbitMessageBatch object that has the same host, if no matches creates one with that host and adds.
     boolean done = false;
-    LOG.info("RABBITMQ: Starting append for, Count: "+atomicCount.addAndGet(1));
     for(RabbitMessageBatch rmb : batches) {
 //    	done = rmb.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
     	done = rmb.checkHostAndAddMessage(""+atomicCount.get()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
     	if(done)
+    	    LOG.info("RABBITMQ: Append for, Count: "+atomicCount.addAndGet(1));
     		break;
     }
     if(!done) {
     	RabbitMessageBatch newBatch = TransactionManager.sendRabbit.new RabbitMessageBatch(((AccessLogWritable)event).getHost());
 //    	done = newBatch.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
     	done = newBatch.checkHostAndAddMessage(""+atomicCount.get()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
+        LOG.info("RABBITMQ: New Batch, Append for, Count: "+atomicCount.addAndGet(1));
     	batches.add(newBatch);
     }
     if( !done )
