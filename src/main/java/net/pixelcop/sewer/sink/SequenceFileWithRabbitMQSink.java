@@ -44,7 +44,6 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 	  super.open();
   }
   
-  int count = 1;
   @Override
   public void append(Event event) throws IOException {
     super.append(event);
@@ -52,21 +51,18 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     boolean done = false;
         
     for(RabbitMessageBatch rmb : batches) {
-//    	done = rmb.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
-    	done = rmb.checkHostAndAddMessage(""+count+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
+    	done = rmb.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
     	if(done) {
-            LOG.info("RABBITMQ: Count: "+count + " , Added to: " + ((AccessLogWritable)event).getHost() + " , SIZE: "+rmb.getCount());
+            LOG.info("RABBITMQ: Added to: " + ((AccessLogWritable)event).getHost() + " , SIZE: "+rmb.getCount());
     		break;
     	}
     }
     if(!done) {
     	RabbitMessageBatch newBatch = TransactionManager.sendRabbit.new RabbitMessageBatch(((AccessLogWritable)event).getHost());
-//    	done = newBatch.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
-    	done = newBatch.checkHostAndAddMessage(""+count+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
+    	done = newBatch.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
     	batches.add(newBatch);
-        LOG.info("RABBITMQ: Count: "+count + " , Created new Batch: " + ((AccessLogWritable)event).getHost() + " , SIZE: "+newBatch.getCount());
+        LOG.info("RABBITMQ: Created new Batch: " + ((AccessLogWritable)event).getHost() + " , SIZE: "+newBatch.getCount());
     }
-    count++;
   }
 
 }
