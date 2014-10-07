@@ -256,7 +256,7 @@ public class SendRabbitMQTopic extends Thread {
 				else 
 					retVal+="\n"+s;
 			}
-			return this.batch.toString();
+			return retVal;
 		}
 		
 		public String getHost() {
