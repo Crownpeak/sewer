@@ -80,34 +80,31 @@ public class SendRabbitMQTopic extends Thread {
     public void sendMessage() {
     	if( batchQueue.size() > 0 ) {
     		RabbitMessageBatch rmb = batchQueue.peek();
-	    	LOG.info("RABBITMQ: \tBATCH QUEUE SIZE: "+batchQueue.size());
 	        if( rmb.getHost().equals(ROUTING_KEY)) {
 	            try{
 	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, rmb.getBatch().toString().getBytes());
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
-	    		            RabbitMessageBatch deleteMe = batchQueue.take();
-//	    		            LOG.info("\n"+deleteMe.getBatchString() + " SIZE: "+ deleteMe.getSize() );
-//	    		    		LOG.info("RABBITMQ: \tSENT: Current Size of queue is: "+batchQueue.size());
-//	    		    		LOG.info("RABBITMQ:\n\t# of Messages in batch: "+rmb.getCount()+"\n\n");
+	    		            batchQueue.take();
 	                    }
 	                    else {
-//	    	                LOG.info("RABBITMQ: Was NACKED, Try resending, leave in queue.");
+	    	                LOG.info("RABBITMQ: NACKED, will try resending it, left in queue.");
 	                    }	                    	
 	                }
 	            } catch (IOException e) {
 	                e.printStackTrace();
-//	                LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
+	                LOG.info("RABBITMQ: ConnectionError, Try resending, left in queue.");
 	            }  catch( InterruptedException e ) {
 	                 e.printStackTrace();
-//	                 LOG.info("RABBITMQ: ConnectionError, Try resending, leave in queue.");
+	                 LOG.info("RABBITMQ: ConnectionError, Try resending, left in queue.");
 	            }
 	        }
 	        else {
-//	            if( LOG.isDebugEnabled() )
-//                LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message. Current Size of queue is: "+batchQueue.size());
-//	    		LOG.info("RABBITMQ:\n\t# of Messages in INVAID batch: -"+rmb.getCount()+"\n\n");
+	            if( LOG.isDebugEnabled() ) {
+	            	LOG.info("RABBITMQ: Event Host does not match Routing Key. Ignoring message. Current Size of queue is: "+batchQueue.size());
+	            }
+	    		LOG.warn("RABBITMQ: Invalid Host: "+rmb.getHost());
 
 	            try {
 					batchQueue.take();

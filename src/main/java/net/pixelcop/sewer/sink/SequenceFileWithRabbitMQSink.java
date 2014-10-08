@@ -31,21 +31,16 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 
   public SequenceFileWithRabbitMQSink(String[] args) {
 	super(args);
-	atomicCount.incrementAndGet();
+//	atomicCount.incrementAndGet();
   }
 
   @Override
   public void close() throws IOException {
 	  //sends each batch (different hosts) to SendRabbit
-	  try {
-		Thread.sleep(500);
-	} catch (InterruptedException e) {
-		e.printStackTrace();
-	}
 	  if( !TransactionManager.sendRabbit.isAlive() )
 		  TransactionManager.restartRabbit();
 	  for(RabbitMessageBatch batch : batches ) {
-		  LOG.info("RABBITMQ: Sending batch of host to Rabbit: "+batch.getHost() + " , SIZE: "+batch.getSize() + " , BATCHES.SIZE(): "+batches.size());
+		  LOG.info("RABBITMQ: Sending batch to Rabbit; Host: "+batch.getHost() + " , # messages: "+batch.getSize());
 		  TransactionManager.sendRabbit.putBatch(batch);
 	  }
 	  super.close();
@@ -56,7 +51,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 	  super.open();
   }
   
-  private AtomicInteger atomicCount = new AtomicInteger();
+//  private AtomicInteger atomicCount = new AtomicInteger();
   
   @Override
   public void append(Event event) throws IOException {
@@ -64,22 +59,28 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     //adding to Rabbit message,adds to the RabbitMessageBatch object that has the same host, if no matches creates one with that host and adds.
     boolean done = false;
     for(RabbitMessageBatch rmb : batches) {
-//    	done = rmb.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
-    	done = rmb.checkHostAndAddMessage("\n"+atomicCount.incrementAndGet()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
+    	done = rmb.checkHostAndAddMessage("\n"+event.toString(), ((AccessLogWritable)event).getHost());
+//    	done = rmb.checkHostAndAddMessage("\n"+atomicCount.get()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
     	if(done) {
-//    	    LOG.info("RABBITMQ: Append for, Count: "+atomicCount.incrementAndGet() + " , Host: "+((AccessLogWritable)event).getHost());
+    		if( LOG.isDebugEnabled() ) {
+    			LOG.info("RABBITMQ: Append to Host: "+((AccessLogWritable)event).getHost());
+    		}
+//    		atomicCount.incrementAndGet();
     		break;
     	}
     }
     if(!done) {
     	RabbitMessageBatch newBatch = TransactionManager.sendRabbit.new RabbitMessageBatch(((AccessLogWritable)event).getHost());
-//    	done = newBatch.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
-    	done = newBatch.checkHostAndAddMessage(atomicCount.incrementAndGet()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
-        LOG.info("RABBITMQ: New Batch, Append for, Count: "+atomicCount.get() + " , Host: "+((AccessLogWritable)event).getHost());
+    	done = newBatch.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
+//    	done = newBatch.checkHostAndAddMessage(atomicCount.incrementAndGet()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
+		if( LOG.isDebugEnabled() ) {
+			LOG.info("RABBITMQ: New Batch, Append to Host: "+((AccessLogWritable)event).getHost());
+		}
     	batches.add(newBatch);
     }
-    if( !done )
-    	LOG.error("RABBITMQ: ERROR: Message not added to batch!\t"+atomicCount.get());
+    if( !done ) {
+    	LOG.error("RABBITMQ: ERROR: Message not added to batch!");
+    }
   }
 
 }
