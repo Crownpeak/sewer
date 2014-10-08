@@ -83,7 +83,7 @@ public class SendRabbitMQTopic extends Thread {
 	    	LOG.info("RABBITMQ: \tBATCH QUEUE SIZE: "+batchQueue.size());
 	        if( rmb.getHost().equals(ROUTING_KEY)) {
 	            try{
-	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, rmb.getBatchString().getBytes());
+	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, rmb.getBatch().toString().getBytes());
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {

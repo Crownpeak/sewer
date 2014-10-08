@@ -37,6 +37,11 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   @Override
   public void close() throws IOException {
 	  //sends each batch (different hosts) to SendRabbit
+	  try {
+		Thread.sleep(500);
+	} catch (InterruptedException e) {
+		e.printStackTrace();
+	}
 	  if( !TransactionManager.sendRabbit.isAlive() )
 		  TransactionManager.restartRabbit();
 	  for(RabbitMessageBatch batch : batches ) {
@@ -60,7 +65,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     boolean done = false;
     for(RabbitMessageBatch rmb : batches) {
 //    	done = rmb.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
-    	done = rmb.checkHostAndAddMessage(""+atomicCount.get()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
+    	done = rmb.checkHostAndAddMessage("\n"+atomicCount.incrementAndGet()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
     	if(done) {
 //    	    LOG.info("RABBITMQ: Append for, Count: "+atomicCount.incrementAndGet() + " , Host: "+((AccessLogWritable)event).getHost());
     		break;
@@ -69,8 +74,8 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     if(!done) {
     	RabbitMessageBatch newBatch = TransactionManager.sendRabbit.new RabbitMessageBatch(((AccessLogWritable)event).getHost());
 //    	done = newBatch.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
-    	done = newBatch.checkHostAndAddMessage(""+atomicCount.get()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
-        LOG.info("RABBITMQ: New Batch, Append for, Count: "+atomicCount.incrementAndGet() + " , Host: "+((AccessLogWritable)event).getHost());
+    	done = newBatch.checkHostAndAddMessage(atomicCount.incrementAndGet()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
+        LOG.info("RABBITMQ: New Batch, Append for, Count: "+atomicCount.get() + " , Host: "+((AccessLogWritable)event).getHost());
     	batches.add(newBatch);
     }
     if( !done )
