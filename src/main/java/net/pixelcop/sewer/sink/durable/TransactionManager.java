@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.pixelcop.sewer.DrainSink;
 import net.pixelcop.sewer.PlumbingBuilder;
 import net.pixelcop.sewer.PlumbingFactory;
-import net.pixelcop.sewer.SendRabbitMQTopic;
+import net.pixelcop.sewer.SendRabbitMQ;
 import net.pixelcop.sewer.Sink;
 import net.pixelcop.sewer.node.ExitCodes;
 import net.pixelcop.sewer.node.Node;
@@ -47,7 +47,7 @@ public class TransactionManager extends Thread {
 //  public static final LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
 //  public static final String testDelimeter = ":::";
   
-  public static SendRabbitMQTopic sendRabbit = new SendRabbitMQTopic();
+  public static SendRabbitMQ sendRabbit = new SendRabbitMQ();
 
   /**
    * Singleton instance
@@ -471,7 +471,7 @@ public class TransactionManager extends Thread {
 
   public static void restartRabbit() {
 	  LOG.warn("RABBITMQ: Rabbit Thread dead, restarting...");
-	  sendRabbit = new SendRabbitMQTopic();
+	  sendRabbit = new SendRabbitMQ();
   }
   
 }
