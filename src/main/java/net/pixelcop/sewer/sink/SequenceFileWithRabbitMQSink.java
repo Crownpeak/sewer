@@ -27,8 +27,9 @@ import com.evidon.nerf.AccessLogWritable;
 public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 
   private static final Logger LOG = LoggerFactory.getLogger(SequenceFileWithRabbitMQSink.class);
-  private BlockingQueue<RabbitMessageBatch> batches = new LinkedBlockingQueue<RabbitMessageBatch>(); 
-  
+//  private BlockingQueue<RabbitMessageBatch> batches = new LinkedBlockingQueue<RabbitMessageBatch>(); 
+  private List<RabbitMessageBatch> batches = new LinkedList<RabbitMessageBatch>(); 
+
   public SequenceFileWithRabbitMQSink(String[] args) {
 	super(args);
 	atomicCount.incrementAndGet();
