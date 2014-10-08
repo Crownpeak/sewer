@@ -37,10 +37,12 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   @Override
   public void close() throws IOException {
 	  //sends each batch (different hosts) to SendRabbit
+	  int size = batches.size();
+//	  LOG.info();
 	  if( !TransactionManager.sendRabbit.isAlive() )
 		  TransactionManager.restartRabbit();
 	  for(RabbitMessageBatch batch : batches ) {
-		  LOG.info("RABBITMQ: ::::::::::::::::::::::::::Putting batch of host: "+batch.getHost() + " , SIZE: "+batch.getCount());
+		  LOG.info("RABBITMQ: Sending batch of host to Rabbit: "+batch.getHost() + " , SIZE: "+batch.getCount() + " , BATCHES.SIZE(): "+batches.size());
 		  TransactionManager.sendRabbit.putBatch(batch);
 	  }
 	  super.close();
