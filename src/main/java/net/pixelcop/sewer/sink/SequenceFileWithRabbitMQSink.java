@@ -28,7 +28,6 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 
   private static final Logger LOG = LoggerFactory.getLogger(SequenceFileWithRabbitMQSink.class);
   private BlockingQueue<RabbitMessageBatch> batches = new LinkedBlockingQueue<RabbitMessageBatch>(); 
-//  private List<RabbitMessageBatch> batches = new LinkedList<RabbitMessageBatch>(); 
 
   public SequenceFileWithRabbitMQSink(String[] args) {
 	super(args);
@@ -38,12 +37,10 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   @Override
   public void close() throws IOException {
 	  //sends each batch (different hosts) to SendRabbit
-	  int size = batches.size();
-//	  LOG.info();
 	  if( !TransactionManager.sendRabbit.isAlive() )
 		  TransactionManager.restartRabbit();
 	  for(RabbitMessageBatch batch : batches ) {
-		  LOG.info("RABBITMQ: Sending batch of host to Rabbit: "+batch.getHost() + " , SIZE: "+batch.getCount() + " , BATCHES.SIZE(): "+batches.size());
+		  LOG.info("RABBITMQ: Sending batch of host to Rabbit: "+batch.getHost() + " , SIZE: "+batch.getSize() + " , BATCHES.SIZE(): "+batches.size());
 		  TransactionManager.sendRabbit.putBatch(batch);
 	  }
 	  super.close();
@@ -65,7 +62,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 //    	done = rmb.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
     	done = rmb.checkHostAndAddMessage(""+atomicCount.get()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
     	if(done) {
-    	    LOG.info("RABBITMQ: Append for, Count: "+atomicCount.incrementAndGet() + " , Host: "+((AccessLogWritable)event).getHost());
+//    	    LOG.info("RABBITMQ: Append for, Count: "+atomicCount.incrementAndGet() + " , Host: "+((AccessLogWritable)event).getHost());
     		break;
     	}
     }

@@ -35,25 +35,18 @@ public class SendRabbitMQTopic extends Thread {
     private ConnectionFactory factory;
     private Channel channel;
     private Connection connection;
-
     private String EXCHANGE_NAME;
     private String EXCHANGE_TYPE;
     private String HOST_NAME;
     private int PORT_NUMBER;
     private String ROUTING_KEY;
-
     private String USERNAME;
     private String PASSWORD;
     private String VIRTUAL_HOST;
-
     private String QUEUE_NAME;
     private String QUEUE_CONFIRM_NAME;
-
     private boolean CONFIRMS=false;
-    
-//    public static LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
-//    public final String testDelimeter = ":::";
-    
+        
     public static BlockingQueue<RabbitMessageBatch> batchQueue = new LinkedBlockingQueue<RabbitMessageBatch>();
 
     public SendRabbitMQTopic() {        
@@ -129,7 +122,6 @@ public class SendRabbitMQTopic extends Thread {
     public void putBatch(RabbitMessageBatch rmb) {
     	try {
 			batchQueue.put(rmb);
-//    		LOG.info("RABBITMQ: ADDED: Current Size of queue is: "+batchQueue.size());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -212,10 +204,8 @@ public class SendRabbitMQTopic extends Thread {
 	
 	public class RabbitMessageBatch {
 		
-//		private String batch=null;
 		private BlockingQueue<String> batch = new LinkedBlockingQueue<String>();
 		private String host="";
-		private int count=0;
 				
 		public RabbitMessageBatch(String host) {
 			this.host = host;
@@ -223,21 +213,12 @@ public class SendRabbitMQTopic extends Thread {
 		
 		public boolean checkHostAndAddMessage(String message, String host) {
 			if(this.host.equals(host)) {
-//				if(this.batch==null)  {
-//					this.batch=message;
-////					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\n"+this.batch);
-//				}
-//				else {
-//					this.batch+="\n"+message;
-////					LOG.info("RABBITMQ: TEST: Message added to "+host+"\tMessage: "+message+"\n\n"+this.batch);
-//				}
 				try {
 					batch.put(message);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 					return false;
 				}
-				count++;
 				return true;
 			}
 			else
@@ -265,10 +246,6 @@ public class SendRabbitMQTopic extends Thread {
 		
 		public int getSize() {
 			return batch.size();
-		}
-		
-		public int getCount() {
-			return count;
 		}
 	}
 	
