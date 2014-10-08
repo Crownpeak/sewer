@@ -87,7 +87,7 @@ public class SendRabbitMQTopic extends Thread {
     public void sendMessage() {
     	if( batchQueue.size() > 0 ) {
     		RabbitMessageBatch rmb = batchQueue.peek();
-//	    	LOG.info("RABBITMQ: PEEKED BATCH SIZE: "+rmb.getCount());
+	    	LOG.info("RABBITMQ: \tBATCH QUEUE SIZE: "+batchQueue.size());
 	        if( rmb.getHost().equals(ROUTING_KEY)) {
 	            try{
 	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, rmb.getBatchString().getBytes());
