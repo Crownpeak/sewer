@@ -27,8 +27,8 @@ import com.evidon.nerf.AccessLogWritable;
 public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 
   private static final Logger LOG = LoggerFactory.getLogger(SequenceFileWithRabbitMQSink.class);
-//  private BlockingQueue<RabbitMessageBatch> batches = new LinkedBlockingQueue<RabbitMessageBatch>(); 
-  private List<RabbitMessageBatch> batches = new LinkedList<RabbitMessageBatch>(); 
+  private BlockingQueue<RabbitMessageBatch> batches = new LinkedBlockingQueue<RabbitMessageBatch>(); 
+//  private List<RabbitMessageBatch> batches = new LinkedList<RabbitMessageBatch>(); 
 
   public SequenceFileWithRabbitMQSink(String[] args) {
 	super(args);
@@ -64,9 +64,10 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     for(RabbitMessageBatch rmb : batches) {
 //    	done = rmb.checkHostAndAddMessage(event.toString(), ((AccessLogWritable)event).getHost());
     	done = rmb.checkHostAndAddMessage(""+atomicCount.get()+" , "+((AccessLogWritable)event).getHost(), ((AccessLogWritable)event).getHost());
-    	if(done)
+    	if(done) {
     	    LOG.info("RABBITMQ: Append for, Count: "+atomicCount.incrementAndGet() + " , Host: "+((AccessLogWritable)event).getHost());
     		break;
+    	}
     }
     if(!done) {
     	RabbitMessageBatch newBatch = TransactionManager.sendRabbit.new RabbitMessageBatch(((AccessLogWritable)event).getHost());
