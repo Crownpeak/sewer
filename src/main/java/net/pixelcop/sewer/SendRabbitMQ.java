@@ -58,16 +58,20 @@ public class SendRabbitMQ extends Thread {
 
         CONFIRMS = Boolean.parseBoolean( prop.getProperty("rmq.queue.is.confirm") );
 
+        createFactory();
+        
+//        factory.setAutomaticRecoveryEnabled(true);
+//        factory.setTopologyRecoveryEnabled(true);
+        start();
+    }
+    
+    public void createFactory() {
     	factory = new ConnectionFactory();
         factory.setHost(HOST_NAME);
         factory.setPort(PORT_NUMBER);
         factory.setUsername(USERNAME);
         factory.setPassword(PASSWORD);
         factory.setVirtualHost(VIRTUAL_HOST);
-        
-//        factory.setAutomaticRecoveryEnabled(true);
-//        factory.setTopologyRecoveryEnabled(true);
-        start();
     }
     
     public void sendMessage() {
@@ -124,18 +128,22 @@ public class SendRabbitMQ extends Thread {
 	                e.printStackTrace();
 	                if(closing)
 	                	LOG.error("RABBITMQ: ConnectionError, CLOSING.\n"+e.getMessage());
-	                if(sending)
+	                else if(sending)
 	                	LOG.error("RABBITMQ: ConnectionError, SENDING.\n"+e.getMessage());
 	                else
 	                	LOG.error("RABBITMQ: ConnectionError, OPENING.\n"+e.getMessage());
+                	LOG.error("RABBITMQ: Recreating Factory...");
+	                createFactory();
 	            }  catch( InterruptedException e ) {
 	                 e.printStackTrace();
 	                 if(closing)
 		                	LOG.error("RABBITMQ: ConnectionError, CLOSING.\n"+e.getMessage());
-		                if(sending)
-		                	LOG.error("RABBITMQ: ConnectionError, SENDING.\n"+e.getMessage());
-		                else
-		                	LOG.error("RABBITMQ: ConnectionError, OPENING.\n"+e.getMessage());
+	                 else if(sending)
+	                	LOG.error("RABBITMQ: ConnectionError, SENDING.\n"+e.getMessage());
+	                 else
+	                	LOG.error("RABBITMQ: ConnectionError, OPENING.\n"+e.getMessage());
+                	LOG.error("RABBITMQ: Recreating Factory...");
+		             createFactory();
 	            }
     			
     		}
