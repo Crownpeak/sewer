@@ -105,6 +105,8 @@ public class SendRabbitMQ extends Thread {
     	            	channel.queueDeclare(QUEUE_NAME, true, false, false, null);
     	            	channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, ROUTING_KEY);
     	            }
+    	            //Test giving time for connection to take hold
+    	            Thread.sleep(3000);
 	            
     	            //send message
     	            sending=true;
