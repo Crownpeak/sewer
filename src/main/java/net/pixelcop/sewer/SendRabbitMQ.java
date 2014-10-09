@@ -97,6 +97,7 @@ public class SendRabbitMQ extends Thread {
     			if(connectionError){
  	                 LOG.error("RABBITMQ: Connection Error, Reseting Connection...");
  	                 resetConnection();
+ 	                 createFactory();
     			}
     			
     		}
@@ -113,6 +114,7 @@ public class SendRabbitMQ extends Thread {
     }
     
     public void createFactory() {
+        LOG.info("RABBITMQ: Reinitializing Connection Factory...");
     	factory = new ConnectionFactory();
         factory.setHost(HOST_NAME);
         factory.setPort(PORT_NUMBER);
@@ -135,7 +137,6 @@ public class SendRabbitMQ extends Thread {
 	        LOG.error("RABBITMQ: Error Closing connection");
 			e.printStackTrace();
 		}
-        createFactory();
     }
     
     public void open() throws IOException {
