@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -47,6 +48,7 @@ public class TransactionManager extends Thread {
 //  public static final LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
 //  public static final String testDelimeter = ":::";
   
+  public static BlockingQueue<BlockingQueue<String>> batchQueue = new LinkedBlockingQueue<BlockingQueue<String>>();
   public static SendRabbitMQ sendRabbit = new SendRabbitMQ();
 
   /**

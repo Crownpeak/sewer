@@ -39,7 +39,7 @@ public class SendRabbitMQ extends Thread {
     private String QUEUE_CONFIRM_NAME;
     private boolean CONFIRMS=false;
         
-    public static BlockingQueue<BlockingQueue<String>> batchQueue = new LinkedBlockingQueue<BlockingQueue<String>>();
+//    public static BlockingQueue<BlockingQueue<String>> batchQueue = new LinkedBlockingQueue<BlockingQueue<String>>();
 
     public SendRabbitMQ() {        
     	loadProperties();
@@ -70,15 +70,16 @@ public class SendRabbitMQ extends Thread {
     }
     
     public void sendMessage() {
-    	if( batchQueue.size() > 0 ) {
-    		BlockingQueue<String> queue = batchQueue.peek();
-    		if( queue.size() > 0) {
+    	if( TransactionManager.batchQueue.size() > 0 ) {
+    		BlockingQueue<String> batch = TransactionManager.batchQueue.peek();
+    		if( batch.size() > 0) {
+    			String message = generateString(batch);
 	            try{
-	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, queue.toString().getBytes());
+	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, batch.toString().getBytes());
 	                if( CONFIRMS) {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
-	    		            batchQueue.take();
+	                    	TransactionManager.batchQueue.take();
 	                    }
 	                    else {
 	    	                LOG.info("RABBITMQ: NACKED, will try resending it, left in queue.");
@@ -98,7 +99,7 @@ public class SendRabbitMQ extends Thread {
     		else {
     			LOG.info("RABBITMQ: Batch is empty, removing from queue.");
     			try {
-					batchQueue.take();
+    				TransactionManager.batchQueue.take();
 				} catch (InterruptedException e) {
 	                LOG.error("RABBITMQ: Error removing black batch from queue.");
 					e.printStackTrace();
@@ -107,9 +108,22 @@ public class SendRabbitMQ extends Thread {
     	}
     }
     
+    public String generateString(BlockingQueue<String> batch) {
+    	String message = null;
+    	for(String s : batch ) {
+    		if(message == null) {
+    			message = s;
+    		}
+    		else {
+    			message += "\n"+s;
+    		}
+    	}
+    	return message;
+    }
+    
     public void putBatch(BlockingQueue<String> queue) {
     	try {
-			batchQueue.put(queue);
+    		TransactionManager.batchQueue.put(queue);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
