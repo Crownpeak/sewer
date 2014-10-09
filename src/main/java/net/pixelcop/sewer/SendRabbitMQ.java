@@ -132,6 +132,7 @@ public class SendRabbitMQ extends Thread {
     
     public void open() {
         try {
+        	LOG.info("RABBITMQ: Opening connection with Rabbit Servers...");
     		connection = factory.newConnection();
             channel = connection.createChannel();
             channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
@@ -142,16 +143,19 @@ public class SendRabbitMQ extends Thread {
             else
                 createQueue();
         } catch (IOException e) {
+        	LOG.info("RABBITMQ: Error establishing connection with Rabbit Servers.");
             e.printStackTrace();
         }
     }
 
     public void createQueueConfirm() {
         try {
+        	LOG.info("RABBITMQ: Declaring confirms queue...");
             channel.queueDeclare(QUEUE_CONFIRM_NAME, true, false, false, null);
             channel.confirmSelect();
             channel.queueBind(QUEUE_CONFIRM_NAME, EXCHANGE_NAME, ROUTING_KEY);
         } catch (IOException e) {
+        	LOG.info("RABBITMQ: Error declaring confirms queue.");
             e.printStackTrace();
         }
     }
@@ -167,6 +171,7 @@ public class SendRabbitMQ extends Thread {
 
     public void close(){
         try {
+        	LOG.info("RABBITMQ: Closing connection with Rabbit Servers...");
         	if( channel != null )
         		if( channel.isOpen() )
         			channel.close();
@@ -182,6 +187,7 @@ public class SendRabbitMQ extends Thread {
         	else
         		LOG.error("RABBITMQ: Connection is null.");
         } catch (IOException e) {
+        	LOG.info("RABBITMQ: Error Closing connection with Rabbit Servers.");
             e.printStackTrace();
         } 
     }
@@ -199,8 +205,10 @@ public class SendRabbitMQ extends Thread {
 	}
 	
 	public void run() {
-		if(batchQueue == null)
+		if(batchQueue == null) {
+        	LOG.info("RABBITMQ: Initializing batchQueue...");
 			batchQueue = new LinkedBlockingQueue<BlockingQueue<String>>();
+		}
 	    open();
 		while(true) {
 			sendMessage();
