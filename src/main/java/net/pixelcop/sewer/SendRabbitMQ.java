@@ -79,6 +79,7 @@ public class SendRabbitMQ extends Thread {
 	                    boolean test = channel.waitForConfirms();
 	                    if( test ) {
 	                    	batchQueue.take();
+	    	                LOG.info("RABBITMQ: Sent to Rabbit Servers, batch of Size: "+batch.size());
 	                    }
 	                    else {
 	    	                LOG.info("RABBITMQ: NACKED, will try resending it, left in queue.");
@@ -123,6 +124,7 @@ public class SendRabbitMQ extends Thread {
     public void putBatch(BlockingQueue<String> queue) {
     	try {
     		batchQueue.put(queue);
+    		LOG.info("RABBITMQ: Batch Queue Size: "+batchQueue.size());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

@@ -36,7 +36,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 	  if( !TransactionManager.sendRabbit.isAlive() ) {
 		  TransactionManager.restartRabbit();
 	  }
-	  LOG.info("RABBITMQ: Sending batch to Batch Queue, Size: "+batch.size());
+	  LOG.info("RABBITMQ: Sending batch of Size: "+batch.size());
 //	  try {
 //		TransactionManager.batchQueue.put(batch);
 //	} catch (InterruptedException e) {
