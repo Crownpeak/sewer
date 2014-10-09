@@ -62,11 +62,11 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 		LOG.info("RABBITMQ: Appending Message: "+event.toString());
 	}
     try {
-    	if( batch.size() > 0) {
+    	if( batch.size() == 0) {
     		batch.put(event.toString());
     	}
     	else {
-    		batch.put(",\n"+event.toString());
+    		batch.put("\n"+event.toString());
     	}
 	} catch (InterruptedException e) {
     	LOG.error("RABBITMQ: ERROR: Message not added to batch!");
