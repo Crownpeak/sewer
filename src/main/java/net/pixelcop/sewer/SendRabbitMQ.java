@@ -72,6 +72,11 @@ public class SendRabbitMQ extends Thread {
         factory.setUsername(USERNAME);
         factory.setPassword(PASSWORD);
         factory.setVirtualHost(VIRTUAL_HOST);
+        try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
     }
     
     public void sendMessage() {
@@ -127,21 +132,21 @@ public class SendRabbitMQ extends Thread {
 	            } catch (IOException e) {
 	                e.printStackTrace();
 	                if(closing)
-	                	LOG.error("RABBITMQ: ConnectionError, CLOSING.\n"+e.getMessage());
+	                	LOG.error("RABBITMQ: ConnectionError, CLOSING.");
 	                else if(sending)
-	                	LOG.error("RABBITMQ: ConnectionError, SENDING.\n"+e.getMessage());
+	                	LOG.error("RABBITMQ: ConnectionError, SENDING.");
 	                else
-	                	LOG.error("RABBITMQ: ConnectionError, OPENING.\n"+e.getMessage());
+	                	LOG.error("RABBITMQ: ConnectionError, OPENING.");
                 	LOG.error("RABBITMQ: Recreating Factory...");
 	                createFactory();
 	            }  catch( InterruptedException e ) {
 	                 e.printStackTrace();
 	                 if(closing)
-		                	LOG.error("RABBITMQ: ConnectionError, CLOSING.\n"+e.getMessage());
+		                	LOG.error("RABBITMQ: ConnectionError, CLOSING.");
 	                 else if(sending)
-	                	LOG.error("RABBITMQ: ConnectionError, SENDING.\n"+e.getMessage());
+	                	LOG.error("RABBITMQ: ConnectionError, SENDING.");
 	                 else
-	                	LOG.error("RABBITMQ: ConnectionError, OPENING.\n"+e.getMessage());
+	                	LOG.error("RABBITMQ: ConnectionError, OPENING.");
                 	LOG.error("RABBITMQ: Recreating Factory...");
 		             createFactory();
 	            }
