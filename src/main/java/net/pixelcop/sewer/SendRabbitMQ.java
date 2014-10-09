@@ -96,7 +96,7 @@ public class SendRabbitMQ extends Thread {
 	            }
     			if(connectionError){
  	                 LOG.error("RABBITMQ: Connection Error, Reseting Connection...");
- 	                 resetConnection();
+// 	                 resetConnection();
  	                 createFactory();
     			}
     			
