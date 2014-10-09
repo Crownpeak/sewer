@@ -73,28 +73,33 @@ public class SendRabbitMQ extends Thread {
     	if( batchQueue.size() > 0 ) {
     		BlockingQueue<String> batch = batchQueue.peek();
     		if( batch.size() > 0) {
-	            try{
-	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, batch.toString().getBytes());
-	                if( CONFIRMS) {
-	                    boolean test = channel.waitForConfirms();
-	                    if( test ) {
-	                    	batchQueue.take();
-	    	                LOG.info("RABBITMQ: Sent to Rabbit Servers, batch of Size: "+batch.size());
-	                    }
-	                    else {
-	    	                LOG.info("RABBITMQ: NACKED, will try resending it, left in queue.");
-	                    }	                    	
-	                }
-	                else {
-	                	LOG.error("RABBITMQ: Confirms is off! Fix!");
-	                }
-	            } catch (IOException e) {
-	                e.printStackTrace();
-	                LOG.error("RABBITMQ: ConnectionError, Try resending, left in queue.");
-	            }  catch( InterruptedException e ) {
-	                 e.printStackTrace();
-	                 LOG.error("RABBITMQ: ConnectionError, Try resending, left in queue.");
-	            }
+    			if( checkAndRetryConnection() ) {
+		            try{
+		                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, batch.toString().getBytes());
+		                if( CONFIRMS) {
+		                    boolean test = channel.waitForConfirms();
+		                    if( test ) {
+		                    	batchQueue.take();
+		    	                LOG.info("RABBITMQ: Sent to Rabbit Servers, batch of Size: "+batch.size());
+		                    }
+		                    else {
+		    	                LOG.info("RABBITMQ: NACKED, will try resending it, left in queue.");
+		                    }	                    	
+		                }
+		                else {
+		                	LOG.error("RABBITMQ: Confirms is off! Fix!");
+		                }
+		            } catch (IOException e) {
+		                e.printStackTrace();
+		                LOG.error("RABBITMQ: ConnectionError, Try resending, left in queue.");
+		            }  catch( InterruptedException e ) {
+		                 e.printStackTrace();
+		                 LOG.error("RABBITMQ: ConnectionError, Try resending, left in queue.");
+		            }
+    			}
+		        else {
+		        	LOG.info("RABBITMQ: Error while in sendMessage(), could not establish connection with Rabbit Servers...");
+		        }
     		}
     		else {
     			LOG.info("RABBITMQ: Batch is empty, removing from queue.");
@@ -128,6 +133,22 @@ public class SendRabbitMQ extends Thread {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+    }
+    
+    public boolean checkAndRetryConnection() {
+    	if( connection == null ) {
+    		open();
+    	}
+    	else if( !connection.isOpen() ) {
+			open();
+		}
+		if( channel == null ) {
+			return false;
+		}
+		else if( !channel.isOpen() ) {
+			return false;
+		}
+		return true;	
     }
     
     public void open() {
