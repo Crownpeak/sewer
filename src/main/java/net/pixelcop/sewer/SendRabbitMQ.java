@@ -72,27 +72,38 @@ public class SendRabbitMQ extends Thread {
     public void sendMessage() {
     	if( batchQueue.size() > 0 ) {
     		BlockingQueue<String> queue = batchQueue.peek();
-            try{
-                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, queue.toString().getBytes());
-                if( CONFIRMS) {
-                    boolean test = channel.waitForConfirms();
-                    if( test ) {
-    		            batchQueue.take();
-                    }
-                    else {
-    	                LOG.info("RABBITMQ: NACKED, will try resending it, left in queue.");
-                    }	                    	
-                }
-                else {
-                	LOG.error("RABBITMQ: Confirms is off! Fix!");
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                LOG.info("RABBITMQ: ConnectionError, Try resending, left in queue.");
-            }  catch( InterruptedException e ) {
-                 e.printStackTrace();
-                 LOG.info("RABBITMQ: ConnectionError, Try resending, left in queue.");
-            }
+    		if( queue.size() > 0) {
+	            try{
+	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, queue.toString().getBytes());
+	                if( CONFIRMS) {
+	                    boolean test = channel.waitForConfirms();
+	                    if( test ) {
+	    		            batchQueue.take();
+	                    }
+	                    else {
+	    	                LOG.info("RABBITMQ: NACKED, will try resending it, left in queue.");
+	                    }	                    	
+	                }
+	                else {
+	                	LOG.error("RABBITMQ: Confirms is off! Fix!");
+	                }
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	                LOG.error("RABBITMQ: ConnectionError, Try resending, left in queue.");
+	            }  catch( InterruptedException e ) {
+	                 e.printStackTrace();
+	                 LOG.error("RABBITMQ: ConnectionError, Try resending, left in queue.");
+	            }
+    		}
+    		else {
+    			LOG.info("RABBITMQ: Batch is empty, removing from queue.");
+    			try {
+					batchQueue.take();
+				} catch (InterruptedException e) {
+	                LOG.error("RABBITMQ: Error removing black batch from queue.");
+					e.printStackTrace();
+				}
+    		}
     	}
     }
     
