@@ -37,13 +37,13 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 		  TransactionManager.restartRabbit();
 	  }
 	  LOG.info("RABBITMQ: Sending batch to Batch Queue, Size: "+batch.size());
-	  try {
-		TransactionManager.batchQueue.put(batch);
-	} catch (InterruptedException e) {
-		LOG.error("RABBITMQ: Error, batch not added to Queue! Batch Lost!");
-		e.printStackTrace();
-	}
-//	  TransactionManager.sendRabbit.putBatch(batch);
+//	  try {
+//		TransactionManager.batchQueue.put(batch);
+//	} catch (InterruptedException e) {
+//		LOG.error("RABBITMQ: Error, batch not added to Queue! Batch Lost!");
+//		e.printStackTrace();
+//	}
+	  TransactionManager.sendRabbit.putBatch(batch);
 	  super.close();
   }
   
@@ -66,7 +66,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     		batch.put(event.toString());
     	}
     	else {
-    		batch.put("\n"+event.toString());
+    		batch.put(",\n"+event.toString());
     	}
 	} catch (InterruptedException e) {
     	LOG.error("RABBITMQ: ERROR: Message not added to batch!");

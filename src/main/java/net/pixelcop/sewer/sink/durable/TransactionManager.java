@@ -48,7 +48,7 @@ public class TransactionManager extends Thread {
 //  public static final LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
 //  public static final String testDelimeter = ":::";
   
-  public static BlockingQueue<BlockingQueue<String>> batchQueue = new LinkedBlockingQueue<BlockingQueue<String>>();
+//  public static BlockingQueue<BlockingQueue<String>> batchQueue = new LinkedBlockingQueue<BlockingQueue<String>>();
   public static SendRabbitMQ sendRabbit = new SendRabbitMQ();
 
   /**
