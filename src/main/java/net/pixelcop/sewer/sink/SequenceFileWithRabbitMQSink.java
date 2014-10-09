@@ -34,7 +34,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   @Override
   public void close() throws IOException {
 	  if( !TransactionManager.sendRabbit.isAlive() ) {
-		  TransactionManager.sendRabbit.close();
+//		  TransactionManager.sendRabbit.close();
 		  TransactionManager.restartRabbit();
 	  }
 	  LOG.info("RABBITMQ: Sending batch of Size: "+batch.size());
