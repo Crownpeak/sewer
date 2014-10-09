@@ -145,7 +145,7 @@ public class SendRabbitMQ extends Thread {
 		if( channel == null ) {
 			return false;
 		}
-		else if( !channel.isOpen() ) {
+		if( !channel.isOpen() ) {
 			return false;
 		}
 		return true;	
