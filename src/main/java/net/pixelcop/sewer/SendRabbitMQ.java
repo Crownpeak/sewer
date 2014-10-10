@@ -119,22 +119,6 @@ public class SendRabbitMQ extends Thread {
         factory.setVirtualHost(VIRTUAL_HOST);
     }
     
-//    public void resetConnection() {
-//    	//close connection
-//        LOG.info("RABBITMQ: Closing connection with Rabbit Servers...");
-//        try {
-//        	if(channel != null) {
-//				channel.close();
-//			}
-//	        if(connection != null) {
-//	        	connection.close();
-//	        }
-//	    }catch (IOException e) {
-//	        LOG.error("RABBITMQ: Error Closing connection");
-//			e.printStackTrace();
-//		}
-//    }
-    
     public void open() throws IOException {
     	LOG.info("RABBITMQ: Opening connection with Rabbit Servers...");
 		connection = factory.newConnection();
@@ -197,19 +181,15 @@ public class SendRabbitMQ extends Thread {
     		LOG.info("RABBITMQ: Batch Queue Size: "+batchQueue.size());
     		if(connectionError){
                  LOG.error("RABBITMQ: Connection Error, Reseting Connection...");
-//                 resetConnection();
                  close();
-                 LOG.error("RABBITMQ: ::::::::: createFactory()");
                  createFactory();
                  open();
                  connectionError=false;
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-            LOG.error("RABBITMQ: ::::::::: createFactory()");
 		} catch (IOException e) {
 			e.printStackTrace();
-            LOG.error("RABBITMQ: ::::::::: createFactory()");
 		}
     }
     
