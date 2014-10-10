@@ -40,6 +40,8 @@ public class SendRabbitMQ extends Thread {
     private boolean CONFIRMS=false;
         
     public static BlockingQueue<BlockingQueue<String>> batchQueue;
+	private boolean connectionError=false;
+
 
     public SendRabbitMQ() {        
     	loadProperties();
@@ -60,9 +62,8 @@ public class SendRabbitMQ extends Thread {
     }
     
     public void sendMessage() {
-    	if( batchQueue.size() > 0 ) {
+    	if( batchQueue.size() > 0 && !connectionError ) {
     		BlockingQueue<String> batch = batchQueue.peek();
-    		boolean connectionError=false;
     		if( batch.size() > 0) {
     			try{
     				if( channel==null || !channel.isOpen()) {
@@ -75,6 +76,7 @@ public class SendRabbitMQ extends Thread {
 	                    if( test ) {
 	                    	batchQueue.take();
 	    	                LOG.info("RABBITMQ: Sent to Rabbit Servers, batch of Size: "+batch.size());
+	    	                connectionError=false;
 	                    }
 	                    else {
 	    	                LOG.info("RABBITMQ: NACKED, will try resending it, left in queue.");
@@ -85,21 +87,15 @@ public class SendRabbitMQ extends Thread {
 	                }
 	                
 	            }  catch( InterruptedException e) {
-	                 e.printStackTrace();
-	                 connectionError=true;
+	            	e.printStackTrace();
+	                connectionError=true;
 	            } catch( IOException e) {
-	                 e.printStackTrace();
-	                 connectionError=true;
+	            	e.printStackTrace();
+	                connectionError=true;
 	            } catch( NullPointerException e) {
-	                 e.printStackTrace();
-	                 connectionError=true;
+	            	e.printStackTrace();
+	                connectionError=true;
 	            }
-    			if(connectionError){
- 	                 LOG.error("RABBITMQ: Connection Error, Reseting Connection...");
- 	                 resetConnection();
- 	                 createFactory();
-    			}
-    			
     		}
     		else {
     			LOG.info("RABBITMQ: Batch is empty, removing from queue.");
@@ -199,7 +195,16 @@ public class SendRabbitMQ extends Thread {
     	try {
     		batchQueue.put(queue);
     		LOG.info("RABBITMQ: Batch Queue Size: "+batchQueue.size());
+    		if(connectionError){
+                 LOG.error("RABBITMQ: Connection Error, Reseting Connection...");
+                 resetConnection();
+                 createFactory();
+                 open();
+                 connectionError=false;
+			}
 		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
     }
