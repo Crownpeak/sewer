@@ -37,7 +37,6 @@ public class SendRabbitMQ extends Thread {
     private String VIRTUAL_HOST;
     private String QUEUE_NAME;
     private String QUEUE_CONFIRM_NAME;
-    private boolean CONFIRMS=false;
         
     public static BlockingQueue<BlockingQueue<String>> batchQueue;
 	private boolean connectionError=false;
@@ -55,7 +54,6 @@ public class SendRabbitMQ extends Thread {
         VIRTUAL_HOST = prop.getProperty("rmq.virtual.host");
         QUEUE_NAME = prop.getProperty("rmq.queue.name");
         QUEUE_CONFIRM_NAME = prop.getProperty("rmq.queue.confirm.name");
-        CONFIRMS = Boolean.parseBoolean( prop.getProperty("rmq.queue.is.confirm") );
 
         createFactory();        
         start();
@@ -71,21 +69,15 @@ public class SendRabbitMQ extends Thread {
     				}
     	            //send message
 	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, batch.toString().getBytes());
-	                if( CONFIRMS) {
-	                    boolean test = channel.waitForConfirms();
-	                    if( test ) {
-	                    	batchQueue.take();
-	    	                LOG.info("RABBITMQ: Sent to Rabbit Servers, batch of Size: "+batch.size());
-	    	                connectionError=false;
-	                    }
-	                    else {
-	    	                LOG.info("RABBITMQ: NACKED, will try resending it, left in queue.");
-	                    }	                    	
-	                }
-	                else {
-	                	LOG.error("RABBITMQ: Confirms is off! Fix!");
-	                }
-	                
+                    boolean acked = channel.waitForConfirms();
+                    if( acked ) {
+                    	batchQueue.take();
+    	                LOG.info("RABBITMQ: Sent to Rabbit Servers, batch of Size: "+batch.size());
+    	                connectionError=false;
+                    }
+                    else {
+    	                LOG.info("RABBITMQ: NACKED, will try resending it, left in queue.");
+                    }	                    	
 	            }  catch( InterruptedException e) {
 	            	e.printStackTrace();
 	                connectionError=true;
@@ -124,11 +116,7 @@ public class SendRabbitMQ extends Thread {
 		connection = factory.newConnection();
         channel = connection.createChannel();
         channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true); // true so its durable
-
-        if(CONFIRMS)
-            createQueueConfirm();
-        else
-            createQueue();
+        createQueueConfirm();
     }
 
     public void createQueueConfirm() {
@@ -139,15 +127,6 @@ public class SendRabbitMQ extends Thread {
             channel.queueBind(QUEUE_CONFIRM_NAME, EXCHANGE_NAME, ROUTING_KEY);
         } catch (IOException e) {
         	LOG.info("RABBITMQ: Error declaring confirms queue.");
-            e.printStackTrace();
-        }
-    }
-
-    public void createQueue() {
-        try {
-            channel.queueDeclare(QUEUE_NAME, true, false, false, null);
-            channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, ROUTING_KEY);
-        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -179,18 +158,25 @@ public class SendRabbitMQ extends Thread {
     	try {
     		batchQueue.put(queue);
     		LOG.info("RABBITMQ: Batch Queue Size: "+batchQueue.size());
-    		if(connectionError){
-                 LOG.error("RABBITMQ: Connection Error, Reseting Connection...");
-                 close();
-                 createFactory();
-                 open();
-                 connectionError=false;
-			}
+    		restartConnection();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
+    }
+    
+    public void restartConnection() {
+    	if(connectionError){
+    		try {
+	            LOG.error("RABBITMQ: Connection Error, Reseting Connection...");
+	            close();
+	            createFactory();
+				open();
+	            connectionError=false;
+    		} catch (IOException e) {
+ 				e.printStackTrace();
+ 			}
+		}
+    		 
     }
     
 	private void loadProperties() {
