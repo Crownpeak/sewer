@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.pixelcop.sewer.DrainSink;
 import net.pixelcop.sewer.PlumbingBuilder;
 import net.pixelcop.sewer.PlumbingFactory;
+import net.pixelcop.sewer.SendRabbitMQ;
 import net.pixelcop.sewer.Sink;
 import net.pixelcop.sewer.node.ExitCodes;
 import net.pixelcop.sewer.node.Node;
@@ -42,6 +44,12 @@ public class TransactionManager extends Thread {
   public static final int STOPPED = 0;
   public static final int IDLE = 1;
   public static final int DRAINING = 2;
+  
+//  public static final LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
+//  public static final String testDelimeter = ":::";
+  
+//  public static BlockingQueue<BlockingQueue<String>> batchQueue = new LinkedBlockingQueue<BlockingQueue<String>>();
+  public static SendRabbitMQ sendRabbit = new SendRabbitMQ();
 
   /**
    * Singleton instance
@@ -463,4 +471,9 @@ public class TransactionManager extends Thread {
     this.silentRollback = silentRollback;
   }
 
+  public static void restartRabbit() {
+	  LOG.warn("RABBITMQ: Rabbit Thread dead, restarting...");
+	  sendRabbit = new SendRabbitMQ();
+  }
+  
 }

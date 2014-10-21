@@ -1,14 +1,13 @@
 package net.pixelcop.sewer.sink;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import net.pixelcop.sewer.DrainSink;
 import net.pixelcop.sewer.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.pixelcop.sewer.SendRabbitMQTopic;
-import com.evidon.nerf.AccessLogWritable;
+import net.pixelcop.sewer.sink.durable.TransactionManager;
 
 /**
  * @author richard craparotta
@@ -17,88 +16,40 @@ import com.evidon.nerf.AccessLogWritable;
 public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 
   private static final Logger LOG = LoggerFactory.getLogger(SequenceFileWithRabbitMQSink.class);
-
-  SendRabbitMQTopic sendRabbit;
-//  ArrayList<MessageBatch> rabbitMessages = new ArrayList<MessageBatch>();
+  private BlockingQueue<String> batch = new LinkedBlockingQueue<String>();
 
   public SequenceFileWithRabbitMQSink(String[] args) {
 	super(args);
-    sendRabbit = new SendRabbitMQTopic();
   }
 
   @Override
   public void close() throws IOException {
-	  sendRabbit.close();
+	  if( !TransactionManager.sendRabbit.isAlive() )
+		  TransactionManager.restartRabbit();
+	  LOG.info("RABBITMQ: Sending batch of Size: "+batch.size());
+	  TransactionManager.sendRabbit.putBatch(batch);
 	  super.close();
   }
-
+  
   @Override
   public void open() throws IOException {
-    super.open();
-    sendRabbit.open();
+	  super.open();
   }
-  
+    
   @Override
   public void append(Event event) throws IOException {
     super.append(event);
-   	sendRabbit.sendMessage(event.toString(),((AccessLogWritable)event).getHost());
-    
-//    boolean added = false;
-//    for( MessageBatch mb : rabbitMessages ) {
-//    	if( mb.isHostMatch( ((AccessLogWritable)event).getHost() ) ) {
-//    		mb.addEvent(event.toString());
-//    		added = true;
-//    		break;
-//    	}
-//    }
-//    if( !added ) {
-//    	MessageBatch mb = new MessageBatch( ((AccessLogWritable)event).getHost() );
-//    	mb.addEvent(event.toString());
-//    	rabbitMessages.add(mb);
-//    }
-	
+    if( LOG.isDebugEnabled() )
+		LOG.info("RABBITMQ: Appending Message: "+event.toString());
+    try {
+    	if( batch.size() == 0)
+    		batch.put(event.toString());
+       	else
+    		batch.put("\n"+event.toString());
+	} catch (InterruptedException e) {
+    	LOG.error("RABBITMQ: ERROR: Message not added to batch!");
+		e.printStackTrace();
+	}
   }
-  
-//  @Override
-//  public void sendRabbitMessage() {
-//	  for( MessageBatch mb : rabbitMessages ) {
-//		  sendRabbit.sendMessage(mb.getAppendedMessage(),mb.getHost());
-//	  }
-//  }
-  
-//  public class MessageBatch {
-//	  
-//	  String host;
-//	  String eventDelimeter = "\n";
-//	  ArrayList<String> events = new ArrayList<String>();
-//	  
-//	  public MessageBatch(String host) {
-//		  this.host=host;
-//	  }
-//	  
-//	  public String getHost() {
-//		  return host;
-//	  }
-//	  
-//	  public boolean isHostMatch(String s) {
-//		  return host.equals(s);
-//	  }
-//	  
-//	  public void addEvent(String event) {
-//		  events.add(event);
-//	  }
-//	  
-//	  public String getAppendedMessage() {
-//		  String retVal = "";
-//		  for( int i = 0; i < events.size(); i++) {
-//			  retVal += events.get(i);
-//			  if( i+1 < events.size() ) {
-//				  retVal += eventDelimeter;
-//			  } 
-//		  }
-//		  return retVal;
-//	  }
-//	  
-//  }
 
 }

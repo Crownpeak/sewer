@@ -52,8 +52,6 @@ public class SequenceFileSink extends BucketedSink {
       LOG.debug("close() called; currently: " + getStatusString());
       LOG.debug("Closing: " + HdfsUtil.pathToString(dstPath));
     }
-
-    sendRabbitMessage();
     
     if (writer != null) {
       writer.close();
@@ -114,6 +112,4 @@ public class SequenceFileSink extends BucketedSink {
     writer.append(event, ONE);
   }
   
-  public void sendRabbitMessage(){};
-
 }
