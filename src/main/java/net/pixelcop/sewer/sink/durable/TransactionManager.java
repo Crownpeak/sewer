@@ -1,8 +1,10 @@
 package net.pixelcop.sewer.sink.durable;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -47,6 +49,7 @@ public class TransactionManager extends Thread {
   public static final int DRAINING = 2;
   
   public static SendRabbitMQ sendRabbit;
+  public static boolean rabbitEnabled;
 
   /**
    * Singleton instance
@@ -108,7 +111,9 @@ public class TransactionManager extends Thread {
     this.unreliableSinkFactory = createUnreliableSinkFactory();
     this.loadTransctionsFromDisk();
     this.setName("TxMan " + this.getId());
-    if( Boolean.valueOf( prop.getProperty("rmq.enabled")) ) {
+    loadProperties();
+    rabbitEnabled = Boolean.valueOf( prop.getProperty("rmq.enabled"));
+    if( rabbitEnabled ) {
     	sendRabbit = new SendRabbitMQ();
     }
     this.start();
@@ -477,5 +482,17 @@ public class TransactionManager extends Thread {
 	  LOG.warn("RABBITMQ: Rabbit Thread dead, restarting...");
 	  sendRabbit = new SendRabbitMQ();
   }
+  
+  private void loadProperties() {
+	  prop = new Properties();	 
+		try {
+	        File file = new File(SendRabbitMQ.class.getClassLoader().getResource( propInput ).toURI());
+	        prop.load( new FileInputStream( file ) );
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+	        e.printStackTrace();
+	    }
+	}
   
 }
