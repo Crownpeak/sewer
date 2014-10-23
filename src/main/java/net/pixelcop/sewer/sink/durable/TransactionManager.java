@@ -109,17 +109,12 @@ public class TransactionManager extends Thread {
     
     loadProperties();
     String sinkConfig = prop.getProperty("sewer.sink");
-    LOG.info("TEST: "+sinkConfig);
     if( sinkConfig.contains("defer_rabbit >") && sinkConfig.contains("seqfile_rabbit(") ) {
-        LOG.info("	TEST: Rabbit");
     	sendRabbit = new SendRabbitMQ();
     }
     else if( (sinkConfig.contains("defer >") && sinkConfig.contains("seqfile_rabbit(")) || (sinkConfig.contains("defer_rabbit >") && sinkConfig.contains("seqfile(")) ) {
-    	 LOG.error("CONFIG ERROR: The defer and seqfile sinks do not match, either both _rabbit or both not. Fix config.properties sewer.sink parameter and restart.");
+    	 LOG.error("CONFIG ERROR: The defer and seqfile sinks do not match, either both _rabbit or both not. Fix config.properties sewer.sink parameter. Exiting...");
          System.exit(ExitCodes.STARTUP_ERROR);
-    }
-    else {
-        LOG.info("	TEST: No Rabbit");
     }
     
     this.silentRollback = false;
