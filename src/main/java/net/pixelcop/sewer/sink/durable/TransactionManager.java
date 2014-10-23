@@ -106,6 +106,17 @@ public class TransactionManager extends Thread {
     if (LOG.isDebugEnabled()) {
       LOG.debug("Initializing TransactionManager " + this.getId());
     }
+    
+    loadProperties();
+    String sinkConfig = prop.getProperty("sewer.sink");
+    if( sinkConfig.contains("defer_rabbit(") && sinkConfig.contains("seqfile_rabbit(") ) {
+    	sendRabbit = new SendRabbitMQ();
+    }
+    else if( (sinkConfig.contains("defer(") && sinkConfig.contains("seqfile_rabbit(")) || (sinkConfig.contains("defer_rabbit(") && sinkConfig.contains("seqfile(")) ) {
+    	 LOG.error("CONFIG ERROR: The defer and seqfile sinks do not match, either both _rabbit or both not. Fix config.properties sewer.sink parameter and restart.");
+         System.exit(ExitCodes.STARTUP_ERROR);
+    }
+    
     this.silentRollback = false;
     this.status = new AtomicInteger();
     this.shutdown = new AtomicBoolean(false);
@@ -114,18 +125,7 @@ public class TransactionManager extends Thread {
     this.unreliableSinkFactory = createUnreliableSinkFactory();
     this.loadTransctionsFromDisk();
     this.setName("TxMan " + this.getId());
-    loadProperties();
-    String sinkConfig = prop.getProperty("sewer.sink");
-    if( sinkConfig.contains("defer_rabbit(") && sinkConfig.contains("seqfile_rabbit(") ) {
-    	rabbitStatus = RABBIT_YES;
-    	sendRabbit = new SendRabbitMQ();
-    }
-    else if( sinkConfig.contains("defer(") && sinkConfig.contains("seqfile(") ) {
-    	rabbitStatus = RABBIT_NO;
-    }
-    else {
-    	rabbitStatus = RABBIT_ERROR;
-    }
+  
     this.start();
   }
 
@@ -279,10 +279,7 @@ public class TransactionManager extends Thread {
   public void run() {
 
     setStatus(IDLE);
-    if( rabbitStatus == RABBIT_ERROR ) {
-    	this.shutdown.set(true);
-    	LOG.error("RABBITMQ: ERROR, defer sink and seqfile sink in config.properties do not match; bot must have _rabbit or both not.");
-    }
+
     while (!isShutdown()) {
 
       // look for tx to drain
