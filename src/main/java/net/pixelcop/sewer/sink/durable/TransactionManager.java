@@ -49,7 +49,6 @@ public class TransactionManager extends Thread {
   public static final int DRAINING = 2;
   
   public static SendRabbitMQ sendRabbit;
-  public static boolean rabbitEnabled;
 
   /**
    * Singleton instance
@@ -112,8 +111,8 @@ public class TransactionManager extends Thread {
     this.loadTransctionsFromDisk();
     this.setName("TxMan " + this.getId());
     loadProperties();
-    rabbitEnabled = Boolean.valueOf( prop.getProperty("rmq.enabled"));
-    if( rabbitEnabled ) {
+    String sinkConfig = prop.getProperty("sewer.sink");
+    if( sinkConfig.contains("seqfile_rabbit") ) {
     	sendRabbit = new SendRabbitMQ();
     }
     this.start();

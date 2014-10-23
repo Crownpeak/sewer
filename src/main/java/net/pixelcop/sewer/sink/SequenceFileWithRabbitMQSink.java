@@ -33,13 +33,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   
   @Override
   public void open() throws IOException {
-	  if( TransactionManager.rabbitEnabled ) { 
-		  super.open();
-	  }
-	  else {
-		  LOG.error("RABBITMQ: rmq.enabled = false. Fix in config.properties and restart.");
-		  throw new IOException();
-	  }
+	  super.open();
   }
     
   @Override
