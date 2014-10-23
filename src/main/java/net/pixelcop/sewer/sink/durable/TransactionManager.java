@@ -49,6 +49,10 @@ public class TransactionManager extends Thread {
   public static final int DRAINING = 2;
   
   public static SendRabbitMQ sendRabbit;
+  public static final int RABBIT_NO = 0;
+  public static final int RABBIT_YES = 1;
+  public static final int RABBIT_ERROR = -1;
+  public static int rabbitStatus=RABBIT_ERROR;
 
   /**
    * Singleton instance
@@ -112,8 +116,15 @@ public class TransactionManager extends Thread {
     this.setName("TxMan " + this.getId());
     loadProperties();
     String sinkConfig = prop.getProperty("sewer.sink");
-    if( sinkConfig.contains("seqfile_rabbit") ) {
+    if( sinkConfig.contains("defer_rabbit(") && sinkConfig.contains("seqfile_rabbit(") ) {
+    	rabbitStatus = RABBIT_YES;
     	sendRabbit = new SendRabbitMQ();
+    }
+    else if( sinkConfig.contains("defer(") && sinkConfig.contains("seqfile(") ) {
+    	rabbitStatus = RABBIT_NO;
+    }
+    else {
+    	rabbitStatus = RABBIT_ERROR;
     }
     this.start();
   }
@@ -268,7 +279,10 @@ public class TransactionManager extends Thread {
   public void run() {
 
     setStatus(IDLE);
-
+    if( rabbitStatus == RABBIT_ERROR ) {
+    	this.shutdown.set(false);
+    	LOG.error("RABBITMQ: ERROR, defer sink and seqfile sink in config.properties do not match; bot must have _rabbit or both not.");
+    }
     while (!isShutdown()) {
 
       // look for tx to drain
