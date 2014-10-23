@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -45,11 +46,7 @@ public class TransactionManager extends Thread {
   public static final int IDLE = 1;
   public static final int DRAINING = 2;
   
-//  public static final LinkedBlockingQueue<String> testArray = new LinkedBlockingQueue<String>();
-//  public static final String testDelimeter = ":::";
-  
-//  public static BlockingQueue<BlockingQueue<String>> batchQueue = new LinkedBlockingQueue<BlockingQueue<String>>();
-  public static SendRabbitMQ sendRabbit = new SendRabbitMQ();
+  public static SendRabbitMQ sendRabbit;
 
   /**
    * Singleton instance
@@ -96,6 +93,8 @@ public class TransactionManager extends Thread {
    * Cheap hack to move rollback logging to debug level
    */
   protected boolean silentRollback;
+  private String propInput = "config.properties";
+  private Properties prop = new Properties();
 
   protected TransactionManager(String walPath) {
     if (LOG.isDebugEnabled()) {
@@ -109,6 +108,9 @@ public class TransactionManager extends Thread {
     this.unreliableSinkFactory = createUnreliableSinkFactory();
     this.loadTransctionsFromDisk();
     this.setName("TxMan " + this.getId());
+    if( Boolean.valueOf( prop.getProperty("rmq.enabled")) ) {
+    	sendRabbit = new SendRabbitMQ();
+    }
     this.start();
   }
 
