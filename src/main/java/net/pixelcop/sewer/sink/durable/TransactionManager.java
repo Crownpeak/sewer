@@ -280,7 +280,7 @@ public class TransactionManager extends Thread {
 
     setStatus(IDLE);
     if( rabbitStatus == RABBIT_ERROR ) {
-    	this.shutdown.set(false);
+    	this.shutdown.set(true);
     	LOG.error("RABBITMQ: ERROR, defer sink and seqfile sink in config.properties do not match; bot must have _rabbit or both not.");
     }
     while (!isShutdown()) {
