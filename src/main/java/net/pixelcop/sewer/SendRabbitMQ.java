@@ -190,7 +190,7 @@ public class SendRabbitMQ extends Thread {
 			name = name.replace(".txt","");
 			Calendar tempCal = Calendar.getInstance();
 			int year=		Integer.parseInt( name.split("_")[0].split("-")[0] );
-			int month=		Integer.parseInt( name.split("_")[0].split("-")[1] );
+			int month=		Integer.parseInt( name.split("_")[0].split("-")[1] )-1; //in CALENDAR CLASS MONTH STARTS AT 0 NOT 1
 			int date=		Integer.parseInt( name.split("_")[0].split("-")[2] );
 			int hourOfDay=	Integer.parseInt( name.split("_")[1].split(":")[0] );
 			int minute=		Integer.parseInt( name.split("_")[1].split(":")[1] );
@@ -213,7 +213,7 @@ public class SendRabbitMQ extends Thread {
 		Calendar currentCal = Calendar.getInstance();
 		LOG.warn("RABBITMQ: After CAL: "+cal.getTime());
 		LOG.warn("RABBITMQ: current_ CAL: "+currentCal.getTime());
-		LOG.warn("RABBITMQ: currentCal.compareTo(cal): "+currentCal.after(cal)+"\n"+currentCal.get(currentCal.MINUTE) + " : "+currentCal.get(currentCal.SECOND)+" compareTo "+cal.get(cal.MINUTE) + " : "+cal.get(cal.SECOND));
+		LOG.warn("RABBITMQ: currentCal.after(cal): "+currentCal.after(cal)+"\n"+currentCal.get(currentCal.MINUTE) + " : "+currentCal.get(currentCal.SECOND)+" compareTo "+cal.get(cal.MINUTE) + " : "+cal.get(cal.SECOND));
 
 		if( currentCal.after(cal) ) {
 			fileName=path+fileName;
