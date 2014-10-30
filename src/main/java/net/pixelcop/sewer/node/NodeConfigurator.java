@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
@@ -86,6 +87,7 @@ public class NodeConfigurator {
     }
 
     // Load config.properties from Classpath as well as command line, if passed
+    System.out.println("TIMESTAMP: "+Calendar.getInstance().getTime());
     addPropsFromClasspath(conf);
 
     if (filename != null) {

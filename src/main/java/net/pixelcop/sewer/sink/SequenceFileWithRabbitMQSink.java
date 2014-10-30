@@ -54,11 +54,9 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 	  fileName= path+cal.get(Calendar.YEAR)+"-"+(cal.get(Calendar.MONTH)+1)+"-"+cal.get(Calendar.DAY_OF_MONTH)+"_"+cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE)+":";
 	  if( cal.get(Calendar.SECOND) < 30) {
 		fileName+="00.txt";
-		LOG.info("RABBITMQ: UNDER 30");
 	  }
 	  else {
 		 fileName+="30.txt";
-		LOG.info("RABBITMQ: OVER 30");
 	  }
 	  LOG.info("RABBITMQ: File Created: "+ fileName);
 	  try {
