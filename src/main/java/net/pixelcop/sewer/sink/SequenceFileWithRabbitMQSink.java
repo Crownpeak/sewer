@@ -25,9 +25,9 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   
   private boolean newFile=true;
   private Calendar cal;
-  private boolean under=true;
   private String fileName="";
-  private String path = "";
+  private String path="mnt/sewer/rabbit/";
+
   private PrintWriter writer=null;
 
   public SequenceFileWithRabbitMQSink(String[] args) {
@@ -49,10 +49,6 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   public void open() throws IOException {
 	  newFile=true;
 	  cal = Calendar.getInstance();
-	  if( cal.get(Calendar.SECOND) < 30)
-		  under=true;
-	  else
-		  under=false;
 	  super.open();
   }
     
@@ -69,7 +65,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 			fileName+="00.txt";
 		else
 			fileName+="30.txt";
-		System.out.println(fileName);
+		LOG.info("RABBITMQ: File Created: "+ fileName);
 		try {
 			writer = new PrintWriter(fileName, "UTF-8");
 		} catch (FileNotFoundException e) {
