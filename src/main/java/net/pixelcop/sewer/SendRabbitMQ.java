@@ -8,7 +8,10 @@ import com.rabbitmq.client.MessageProperties;
 
 import java.io.FileInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.util.Calendar;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -38,7 +41,7 @@ public class SendRabbitMQ extends Thread {
     private String QUEUE_NAME;
     private String QUEUE_CONFIRM_NAME;
         
-    public static BlockingQueue<BlockingQueue<String>> batchQueue;
+//    public static BlockingQueue<BlockingQueue<String>> batchQueue;
 	private boolean connectionError=false;
 
 
@@ -59,45 +62,58 @@ public class SendRabbitMQ extends Thread {
         start();
     }
     
+    String path="";
     public void sendMessage() {
-    	if( batchQueue.size() > 0 && !connectionError ) {
-    		BlockingQueue<String> batch = batchQueue.peek();
-    		if( batch.size() > 0) {
-    			try{
-    				if( channel==null || !channel.isOpen()) {
-    					open();
-    				}
-    	            //send message
-	                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, batch.toString().getBytes());
-                    boolean acked = channel.waitForConfirms();
-                    if( acked ) {
-                    	batchQueue.take();
-    	                LOG.info("RABBITMQ: Sent to Rabbit Servers, batch of Size: "+batch.size());
-    	                connectionError=false;
-                    }
-                    else {
-    	                LOG.info("RABBITMQ: NACKED, will try resending it, left in queue.");
-                    }	                    	
-	            }  catch( InterruptedException e) {
-	            	e.printStackTrace();
-	                connectionError=true;
-	            } catch( IOException e) {
-	            	e.printStackTrace();
-	                connectionError=true;
-	            } catch( NullPointerException e) {
-	            	e.printStackTrace();
-	                connectionError=true;
-	            }
-    		}
-    		else {
-    			LOG.info("RABBITMQ: Batch is empty, removing from queue.");
-    			try {
-    				batchQueue.take();
-				} catch (InterruptedException e) {
-	                LOG.error("RABBITMQ: Error removing black batch from queue.");
-					e.printStackTrace();
-				}
-    		}
+    	
+    	String fileName = checkFile();
+			
+    	if( fileName != null && !connectionError ) {
+//    		BlockingQueue<String> batch = batchQueue.peek();
+    		File in = new File(fileName);
+			FileInputStream fis;
+			try {
+				fis = new FileInputStream(in);
+			    byte[] data = new byte[(int)in.length()];
+			    fis.read(data);
+			    fis.close();
+			    String batch = new String(data, "UTF-8");
+	    		if( batch.length() > 0) {
+	    			try{
+	    				if( channel==null || !channel.isOpen()) {
+	    					open();
+	    				}
+	    	            //send message
+		                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, batch.getBytes());
+	                    boolean acked = channel.waitForConfirms();
+	                    if( acked ) {
+	//                    	batchQueue.take();
+	                    	in.delete();
+	    	                LOG.info("RABBITMQ: Sent to Rabbit Servers, batch of Size: "+batch.split("\n").length);
+	    	                connectionError=false;
+	                    }
+	                    else {
+	    	                LOG.info("RABBITMQ: NACKED, will try resending it, left in queue.");
+	                    }	                    	
+		            }  catch( InterruptedException e) {
+		            	e.printStackTrace();
+		                connectionError=true;
+		            } catch( IOException e) {
+		            	e.printStackTrace();
+		                connectionError=true;
+		            } catch( NullPointerException e) {
+		            	e.printStackTrace();
+		                connectionError=true;
+		            }
+	    		}
+	    		else {
+	    			LOG.info("RABBITMQ: Batch is empty, removing from queue.");
+	    			in.delete();
+	    		}
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
     	}
     }
     
@@ -154,13 +170,50 @@ public class SendRabbitMQ extends Thread {
         } 
     }
 
-    public void putBatch(BlockingQueue<String> queue) {
-    	try {
-    		batchQueue.put(queue);
-    		LOG.info("RABBITMQ: Batch Queue Size: "+batchQueue.size());
-    		restartConnection();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+//    public void putBatch(BlockingQueue<String> queue) {
+//    	try {
+//    		batchQueue.put(queue);
+//    		LOG.info("RABBITMQ: Batch Queue Size: "+batchQueue.size());
+//    		restartConnection();
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//    }
+    
+    public String checkFile() {
+		File folder = new File(path);
+		String fileName="";
+		Calendar cal=null;
+		for( File f : folder.listFiles()) {
+			String name = f.getName();
+			name = name.replace(path,"");
+			name = name.replace(".txt","");
+			Calendar tempCal = Calendar.getInstance();
+			int year=		Integer.parseInt( name.split("_")[0].split("-")[0] );
+			int month=		Integer.parseInt( name.split("_")[0].split("-")[1] );
+			int date=		Integer.parseInt( name.split("_")[0].split("-")[2] );
+			int hourOfDay=	Integer.parseInt( name.split("_")[1].split(":")[0] );
+			int minute=		Integer.parseInt( name.split("_")[1].split(":")[1] );
+			int second=		Integer.parseInt( name.split("_")[1].split(":")[2] );
+			tempCal.set(year, month, date, hourOfDay, minute, second);
+			if( cal == null) {
+				cal = tempCal;
+				fileName=f.getName();
+			}
+			else if(cal.compareTo(tempCal) > 0) {
+				cal=tempCal;
+				fileName=f.getName();
+			}
+		}
+		cal.add(cal.SECOND, 30);
+		Calendar tempCal = Calendar.getInstance();
+		
+		if(cal.compareTo(tempCal) > 0 ) {
+			fileName=path+fileName;
+			return fileName;
+		}
+		else {
+			return null;
 		}
     }
     
@@ -192,10 +245,10 @@ public class SendRabbitMQ extends Thread {
 	}
 	
 	public void run() {
-		if(batchQueue == null) {
-        	LOG.info("RABBITMQ: Initializing batchQueue...");
-			batchQueue = new LinkedBlockingQueue<BlockingQueue<String>>();
-		}
+//		if(batchQueue == null) {
+//        	LOG.info("RABBITMQ: Initializing batchQueue...");
+//			batchQueue = new LinkedBlockingQueue<BlockingQueue<String>>();
+//		}
 		while(true) {
 			sendMessage();
 		}
