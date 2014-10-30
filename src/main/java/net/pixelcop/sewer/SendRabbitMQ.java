@@ -205,6 +205,8 @@ public class SendRabbitMQ extends Thread {
 				fileName=f.getName();
 			}
 		}
+		if( cal == null)
+			return null;
 		cal.add(cal.SECOND, 30);
 		Calendar tempCal = Calendar.getInstance();
 		
