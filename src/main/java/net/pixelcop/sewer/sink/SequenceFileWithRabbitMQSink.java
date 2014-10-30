@@ -23,7 +23,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   private static final Logger LOG = LoggerFactory.getLogger(SequenceFileWithRabbitMQSink.class);
   private BlockingQueue<String> batch = new LinkedBlockingQueue<String>();
   
-  private boolean newFile=true;
+//  private boolean newFile=true;
   private Calendar cal;
   private String fileName="";
   private String path="/mnt/sewer/rabbit/";
@@ -49,9 +49,28 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   
   @Override
   public void open() throws IOException {
-	  newFile=true;
+//	  newFile=true;
 	  cal = Calendar.getInstance();
 	  TransactionManager.sendRabbit.checkFolder(path);
+	  if(writer != null)
+		writer.close();
+	  fileName= path+cal.get(Calendar.YEAR)+"-"+(cal.get(Calendar.MONTH)+1)+"-"+cal.get(Calendar.DAY_OF_MONTH)+"_"+cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE)+":";
+	  if( cal.get(Calendar.SECOND) < 30) {
+		fileName+="00.txt";
+		LOG.info("RABBITMQ: UNDER 30");
+	  }
+	  else {
+		 fileName+="30.txt";
+		LOG.info("RABBITMQ: OVER 30");
+	  }
+	  LOG.info("RABBITMQ: File Created: "+ fileName);
+	  try {
+		  writer = new PrintWriter(fileName, "UTF-8");
+	  } catch (FileNotFoundException e) {
+		  e.printStackTrace();
+	  } catch (UnsupportedEncodingException e) {
+		e.printStackTrace();
+	  }
 	  super.open();
   }
     
@@ -60,30 +79,34 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     super.append(event);
     if( LOG.isDebugEnabled() )
 		LOG.info("RABBITMQ: Appending Message: "+event.toString());
-    if( newFile) {
-		if(writer != null)
-			writer.close();
-		fileName= path+cal.get(Calendar.YEAR)+"-"+(cal.get(Calendar.MONTH)+1)+"-"+cal.get(Calendar.DAY_OF_MONTH)+"_"+cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE)+":";
-		if( cal.get(Calendar.SECOND) < 30)
-			fileName+="00.txt";
-		else
-			fileName+="30.txt";
-		LOG.info("RABBITMQ: File Created: "+ fileName);
-		try {
-			writer = new PrintWriter(fileName, "UTF-8");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		writer.write(event.toString());
+//    if( newFile) {
+//    	newFile=false;
+//		if(writer != null)
+//			writer.close();
+//		fileName= path+cal.get(Calendar.YEAR)+"-"+(cal.get(Calendar.MONTH)+1)+"-"+cal.get(Calendar.DAY_OF_MONTH)+"_"+cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE)+":";
+//		if( cal.get(Calendar.SECOND) < 30) {
+//			fileName+="00.txt";
+//			LOG.info("RABBITMQ: UNDER 30");
+//		}
+//		else {
+//			fileName+="30.txt";
+//			LOG.info("RABBITMQ: OVER 30");
+//		}
+//		LOG.info("RABBITMQ: File Created: "+ fileName);
+//		try {
+//			writer = new PrintWriter(fileName, "UTF-8");
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (UnsupportedEncodingException e) {
+//			e.printStackTrace();
+//		}
+//		writer.write(event.toString());
+//		writer.flush();
+//	}
+//	else {
+		writer.write(event.toString()+"\n");
 		writer.flush();
-		newFile=false;
-	}
-	else {
-		writer.write("\n"+event.toString());
-		writer.flush();
-	}
+//	}
 //    	if( batch.size() == 0)
 //    		batch.put(event.toString());
 //       	else
