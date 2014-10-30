@@ -36,8 +36,10 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 
   @Override
   public void close() throws IOException {
-	  writer.flush();
-	  writer.close();
+	  if( writer != null) {
+		writer.flush();
+	  	writer.close();
+	  }
 	  if( !TransactionManager.sendRabbit.isAlive() )
 		  TransactionManager.restartRabbit();
 	  LOG.info("RABBITMQ: Sending batch of Size: "+batch.size());
