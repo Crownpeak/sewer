@@ -213,7 +213,7 @@ public class SendRabbitMQ extends Thread {
 		LOG.warn("RABBITMQ: After CAL: "+cal.get(cal.MINUTE) + " : "+cal.get(cal.SECOND));
 		LOG.warn("RABBITMQ: Temp_ CAL: "+tempCal.get(tempCal.MINUTE) + " : "+tempCal.get(tempCal.SECOND));
 
-		if(cal.compareTo(tempCal) > 0 ) {
+		if(cal.compareTo(tempCal) < 0 ) {
 			fileName=path+fileName;
 			LOG.warn("RABBITMQ: This file is good to be sent to Servers: "+fileName);
 			return fileName;
