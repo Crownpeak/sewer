@@ -213,9 +213,9 @@ public class SendRabbitMQ extends Thread {
 		Calendar currentCal = Calendar.getInstance();
 		LOG.warn("RABBITMQ: After CAL: "+cal.getTime());
 		LOG.warn("RABBITMQ: current_ CAL: "+currentCal.getTime());
-		LOG.warn("RABBITMQ: currentCal.compareTo(cal): "+currentCal.compareTo(cal)+"\n"+currentCal.get(currentCal.MINUTE) + " : "+currentCal.get(currentCal.SECOND)+" compareTo "+cal.get(cal.MINUTE) + " : "+cal.get(cal.SECOND));
+		LOG.warn("RABBITMQ: currentCal.compareTo(cal): "+currentCal.after(cal)+"\n"+currentCal.get(currentCal.MINUTE) + " : "+currentCal.get(currentCal.SECOND)+" compareTo "+cal.get(cal.MINUTE) + " : "+cal.get(cal.SECOND));
 
-		if(currentCal.compareTo(cal) == -1 ) {
+		if( currentCal.after(cal) ) {
 			fileName=path+fileName;
 			LOG.warn("RABBITMQ: This file is good to be sent to Servers: "+fileName);
 			return fileName;
