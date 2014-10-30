@@ -26,7 +26,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   private boolean newFile=true;
   private Calendar cal;
   private String fileName="";
-  private String path="mnt/sewer/rabbit/";
+  private String path="/mnt/sewer/rabbit/";
 
   private PrintWriter writer=null;
 
@@ -49,6 +49,7 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
   public void open() throws IOException {
 	  newFile=true;
 	  cal = Calendar.getInstance();
+	  TransactionManager.sendRabbit.checkFolder(path);
 	  super.open();
   }
     

@@ -43,7 +43,7 @@ public class SendRabbitMQ extends Thread {
         
 //    public static BlockingQueue<BlockingQueue<String>> batchQueue;
 	private boolean connectionError=false;
-	private String path="mnt/sewer/rabbit/";
+	private String path="/mnt/sewer/rabbit/";
 
 
     public SendRabbitMQ() {        
@@ -64,7 +64,7 @@ public class SendRabbitMQ extends Thread {
     }
     
     public void sendMessage() {
-    	
+    	checkFolder(path);
     	String fileName = checkFile();
 			
     	if( fileName != null && !connectionError ) {
@@ -215,6 +215,13 @@ public class SendRabbitMQ extends Thread {
 		else {
 			return null;
 		}
+    }
+    
+    public void checkFolder(String p) {
+    	File folder = new File(p);
+    	if( !folder.exists() ) {
+    		folder.mkdirs();
+    	}
     }
     
     public void restartConnection() {
