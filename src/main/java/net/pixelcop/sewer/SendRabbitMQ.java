@@ -40,8 +40,9 @@ public class SendRabbitMQ extends Thread {
     private String VIRTUAL_HOST;
     private String QUEUE_NAME;
     private String QUEUE_CONFIRM_NAME;
+    
+    private String RABBIT_FILE_PATH;
         
-//    public static BlockingQueue<BlockingQueue<String>> batchQueue;
 	private boolean connectionError=false;
 	private String path="/mnt/sewer/rabbit/";
 
@@ -59,6 +60,7 @@ public class SendRabbitMQ extends Thread {
         QUEUE_NAME = prop.getProperty("rmq.queue.name");
         QUEUE_CONFIRM_NAME = prop.getProperty("rmq.queue.confirm.name");
 
+        RABBIT_FILE_PATH = prop.getProperty("rmq.file.path");
         createFactory();        
         start();
     }
@@ -68,7 +70,6 @@ public class SendRabbitMQ extends Thread {
     	String fileName = checkFile();
 			
     	if( fileName != null && !connectionError ) {
-//    		BlockingQueue<String> batch = batchQueue.peek();
     		File in = new File(fileName);
 			FileInputStream fis;
 			try {
@@ -86,7 +87,6 @@ public class SendRabbitMQ extends Thread {
 		                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, batch.getBytes());
 	                    boolean acked = channel.waitForConfirms();
 	                    if( acked ) {
-	//                    	batchQueue.take();
 	                    	in.delete();
 	    	                LOG.info("RABBITMQ: Sent to Rabbit Servers, batch of Size: "+batch.split("\n").length);
 	    	                connectionError=false;
@@ -169,16 +169,6 @@ public class SendRabbitMQ extends Thread {
             e.printStackTrace();
         } 
     }
-
-//    public void putBatch(BlockingQueue<String> queue) {
-//    	try {
-//    		batchQueue.put(queue);
-//    		LOG.info("RABBITMQ: Batch Queue Size: "+batchQueue.size());
-//    		restartConnection();
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//    }
     
     public String checkFile() {
 		File folder = new File(path);
@@ -207,13 +197,8 @@ public class SendRabbitMQ extends Thread {
 		}
 		if( cal == null)
 			return null;
-		LOG.warn("\n\n\n\n\n\n\n\n*************************************\n\n");
-		LOG.warn("RABBITMQ: BEFORE CAL: "+cal.getTime());
 		cal.add(cal.SECOND, 30);
 		Calendar currentCal = Calendar.getInstance();
-		LOG.warn("RABBITMQ: After CAL: "+cal.getTime());
-		LOG.warn("RABBITMQ: current_ CAL: "+currentCal.getTime());
-		LOG.warn("RABBITMQ: currentCal.after(cal): "+currentCal.after(cal)+"\n"+currentCal.get(currentCal.MINUTE) + " : "+currentCal.get(currentCal.SECOND)+" compareTo "+cal.get(cal.MINUTE) + " : "+cal.get(cal.SECOND));
 
 		if( currentCal.after(cal) ) {
 			fileName=path+fileName;
@@ -230,6 +215,10 @@ public class SendRabbitMQ extends Thread {
     	if( !folder.exists() ) {
     		folder.mkdirs();
     	}
+    }
+    
+    public String getRabbitFilePath() {
+    	return RABBIT_FILE_PATH;
     }
     
     public void restartConnection() {
@@ -260,10 +249,6 @@ public class SendRabbitMQ extends Thread {
 	}
 	
 	public void run() {
-//		if(batchQueue == null) {
-//        	LOG.info("RABBITMQ: Initializing batchQueue...");
-//			batchQueue = new LinkedBlockingQueue<BlockingQueue<String>>();
-//		}
 		while(true) {
 			sendMessage();
 		}

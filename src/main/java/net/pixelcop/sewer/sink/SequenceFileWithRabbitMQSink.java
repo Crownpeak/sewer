@@ -21,12 +21,10 @@ import net.pixelcop.sewer.sink.durable.TransactionManager;
 public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 
   private static final Logger LOG = LoggerFactory.getLogger(SequenceFileWithRabbitMQSink.class);
-  private BlockingQueue<String> batch = new LinkedBlockingQueue<String>();
   
-//  private boolean newFile=true;
   private Calendar cal;
   private String fileName="";
-  private String path="/mnt/sewer/rabbit/";
+  private String path;
 
   private PrintWriter writer=null;
 
@@ -42,15 +40,14 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
 	  }
 	  if( !TransactionManager.sendRabbit.isAlive() )
 		  TransactionManager.restartRabbit();
-	  LOG.info("RABBITMQ: Sending batch of Size: "+batch.size());
-//	  TransactionManager.sendRabbit.putBatch(batch);
+	  LOG.info("RABBITMQ: Finished with batch.");
 	  super.close();
   }
   
   @Override
   public void open() throws IOException {
-//	  newFile=true;
 	  cal = Calendar.getInstance();
+	  path = TransactionManager.sendRabbit.getRabbitFilePath();
 	  TransactionManager.sendRabbit.checkFolder(path);
 	  if(writer != null)
 		writer.close();
@@ -79,38 +76,8 @@ public class SequenceFileWithRabbitMQSink extends SequenceFileSink {
     super.append(event);
     if( LOG.isDebugEnabled() )
 		LOG.info("RABBITMQ: Appending Message: "+event.toString());
-//    if( newFile) {
-//    	newFile=false;
-//		if(writer != null)
-//			writer.close();
-//		fileName= path+cal.get(Calendar.YEAR)+"-"+(cal.get(Calendar.MONTH)+1)+"-"+cal.get(Calendar.DAY_OF_MONTH)+"_"+cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE)+":";
-//		if( cal.get(Calendar.SECOND) < 30) {
-//			fileName+="00.txt";
-//			LOG.info("RABBITMQ: UNDER 30");
-//		}
-//		else {
-//			fileName+="30.txt";
-//			LOG.info("RABBITMQ: OVER 30");
-//		}
-//		LOG.info("RABBITMQ: File Created: "+ fileName);
-//		try {
-//			writer = new PrintWriter(fileName, "UTF-8");
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (UnsupportedEncodingException e) {
-//			e.printStackTrace();
-//		}
-//		writer.write(event.toString());
-//		writer.flush();
-//	}
-//	else {
 		writer.write(event.toString()+"\n");
 		writer.flush();
-//	}
-//    	if( batch.size() == 0)
-//    		batch.put(event.toString());
-//       	else
-//    		batch.put("\n"+event.toString());
   }
 
 }
