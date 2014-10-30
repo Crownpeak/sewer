@@ -80,6 +80,8 @@ public class NodeConfigurator {
    * @return
    */
   private NodeConfig createConfig(String filename, boolean loadHadoopConfigs) {
+	System.out.println("TIMESTAMP: "+Calendar.getInstance().getTime());
+
     NodeConfig conf = new NodeConfig();
 
     if (loadHadoopConfigs) {
@@ -87,7 +89,6 @@ public class NodeConfigurator {
     }
 
     // Load config.properties from Classpath as well as command line, if passed
-    System.out.println("TIMESTAMP: "+Calendar.getInstance().getTime());
     addPropsFromClasspath(conf);
 
     if (filename != null) {
