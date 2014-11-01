@@ -1,6 +1,6 @@
 
 # Version number for this release
-VERSION_NUMBER = "0.6.2"
+VERSION_NUMBER = "0.7.0"
 
 # Version number of nerf jar containing shared class:
 #   - com.evidon.nerf.sewer.AnonAccessLogExtractor
